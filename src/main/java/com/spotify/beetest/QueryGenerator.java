@@ -9,31 +9,17 @@ import org.apache.commons.cli.ParseException;
 
 public class QueryGenerator {
 
-    private String table;
-    private boolean dropInputTable = true;
     private String setupFilename;
     private String queryFilename;
-    private String inputFilename;
     private String expectedFilename;
     private String outputDir;
 
-    public String getSetupQuery(String tableName, String setupFilename,
-            boolean dropInputTable) throws IOException {
-
-        StringBuilder query = new StringBuilder();
-        if (dropInputTable) {
-            query.append("DROP TABLE IF EXISTS ");
-            query.append(tableName);
-            query.append(";\n");
-        }
-
-        String fileContent = Utils.readFile(setupFilename);
-        query.append(fileContent);
-
-        return query.toString();
+    public String getSetupQuery(String setupFilename)
+            throws IOException {
+        return Utils.readFile(setupFilename);
     }
 
-    public String getTestedQuery(String tableName, String outputDir,
+    public String getTestedQuery(String outputDir,
             String queryFilename) throws IOException {
 
         StringBuilder query = new StringBuilder();
@@ -48,24 +34,14 @@ public class QueryGenerator {
         return query.toString();
     }
 
-    public String getDataLoadQuery(String tableName, String inputFilename)
-            throws IOException {
-        return "LOAD DATA LOCAL INPATH '" + inputFilename
-                + "' OVERWRITE INTO TABLE " + tableName + ";\n";
-    }
-
     public String getFinalQuery() throws IOException {
-        return getSetupQuery(table, setupFilename, dropInputTable)
-                + getDataLoadQuery(table, inputFilename)
-                + getTestedQuery(table, outputDir, queryFilename);
+        return getSetupQuery(setupFilename)
+                + getTestedQuery(outputDir, queryFilename);
     }
 
     public Options getOptions() {
         Options options = new Options();
-        options.addOption("t", true, "specify a table");
-        options.addOption("d", true, "delete table if exists");
         options.addOption("s", true, "specify a setup file");
-        options.addOption("i", true, "specify an input file");
         options.addOption("q", true, "specify a query file");
         options.addOption("e", true, "specify an expected output file");
         options.addOption("o", true, "specify an output directory");
@@ -79,25 +55,10 @@ public class QueryGenerator {
         Options options = getOptions();
         CommandLineParser parser = new BasicParser();
         CommandLine cmd = parser.parse(options, args);
-        if (cmd.hasOption("t")) {
-            table = cmd.getOptionValue("t");
-        } else {
-            System.err.println("Option t (table) is mandatory");
-            validArgs = false;
-        }
-        if (cmd.hasOption("d")) {
-            dropInputTable = Boolean.parseBoolean(cmd.getOptionValue("d"));
-        }
         if (cmd.hasOption("s")) {
             setupFilename = cmd.getOptionValue("s");
         } else {
             System.err.println("Option -s (setupFilename) is mandatory");
-            validArgs = false;
-        }
-        if (cmd.hasOption("i")) {
-            inputFilename = cmd.getOptionValue("i");
-        } else {
-            System.err.println("Option -i (inputFilename) is mandatory");
             validArgs = false;
         }
         if (cmd.hasOption("q")) {
