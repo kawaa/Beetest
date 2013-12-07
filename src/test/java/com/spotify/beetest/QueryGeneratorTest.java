@@ -1,0 +1,41 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.spotify.beetest;
+
+import java.io.IOException;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+/**
+ *
+ * @author kawaa
+ */
+public class QueryGeneratorTest {
+
+    String resourcesDir = "src/main/resources";
+
+    @Test
+    public void test1() throws IOException, Exception {
+        String query = new QueryGenerator().getSetupQuery("words",
+                "src/main/resources/tests/setup1.hql", true);
+    }
+
+    @Test
+    public void test2() throws IOException, Exception {
+        String query = new QueryGenerator().getTestedQuery("words", "output",
+                "src/main/resources/tests/query1.hql");
+    }
+
+    @Test
+    public void test3() throws IOException, Exception {
+        String[] args = {"-t", "words",
+            "-i", "src/main/resources/tests/input1.txt",
+            "-e", "src/main/resources/tests/output1.txt",
+            "-s", "src/main/resources/tests/setup1.hql",
+            "-q", "src/main/resources/tests/query1.hql",
+            "-o", "/tmp/beetest",};
+        String query = new QueryGenerator().run(args);
+    }
+}
