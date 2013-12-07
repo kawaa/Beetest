@@ -90,7 +90,6 @@ public class QueryGenerator {
         }
         if (cmd.hasOption("s")) {
             setupFilename = cmd.getOptionValue("s");
-            System.out.println(setupFilename);
         } else {
             System.err.println("Option -s (setupFilename) is mandatory");
             validArgs = false;
