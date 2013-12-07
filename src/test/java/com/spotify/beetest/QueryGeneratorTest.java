@@ -18,13 +18,13 @@ public class QueryGeneratorTest {
 
     @Test
     public void test1() throws IOException, Exception {
-        String query = new QueryGenerator().getSetupQuery("words",
-                "src/main/resources/tests/setup1.hql", true);
+        String query = new QueryGenerator().getSetupQuery(
+                "src/main/resources/tests/setup1.hql");
     }
 
     @Test
     public void test2() throws IOException, Exception {
-        String query = new QueryGenerator().getTestedQuery("words", "output",
+        String query = new QueryGenerator().getTestedQuery("output",
                 "src/main/resources/tests/query1.hql");
     }
 
