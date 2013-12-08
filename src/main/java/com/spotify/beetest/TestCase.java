@@ -1,18 +1,51 @@
 package com.spotify.beetest;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-public class QueryGenerator {
+public class TestCase {
 
     private String setupFilename;
     private String queryFilename;
     private String expectedFilename;
-    private String outputDir;
+    private String outputDirectory;
+
+    public TestCase() {
+    }
+
+    public TestCase(String filename) throws IOException {
+        Properties prop = new Properties();
+
+        //load a properties file
+        prop.load(new FileInputStream(filename));
+
+        setupFilename = prop.getProperty("s");
+        queryFilename = prop.getProperty("q");
+        expectedFilename = prop.getProperty("e");
+        outputDirectory = prop.getProperty("o");
+    }
+
+    public TestCase(String setupFilename, String queryFilename,
+            String expectedFilename, String outputDir) {
+        this.setupFilename = setupFilename;
+        this.queryFilename = queryFilename;
+        this.expectedFilename = expectedFilename;
+        this.outputDirectory = outputDir;
+    }
+
+    public String getExpectedFilename() {
+        return expectedFilename;
+    }
+
+    public String getOutputDirectory() {
+        return outputDirectory;
+    }
 
     public String getSetupQuery(String setupFilename)
             throws IOException {
@@ -36,7 +69,7 @@ public class QueryGenerator {
 
     public String getFinalQuery() throws IOException {
         return getSetupQuery(setupFilename)
-                + getTestedQuery(outputDir, queryFilename);
+                + getTestedQuery(outputDirectory, queryFilename);
     }
 
     public Options getOptions() {
@@ -74,7 +107,7 @@ public class QueryGenerator {
             validArgs = false;
         }
         if (cmd.hasOption("o")) {
-            outputDir = cmd.getOptionValue("o");
+            outputDirectory = cmd.getOptionValue("o");
         } else {
             System.err.println("Option -o (outputDir) is mandatory");
             validArgs = false;
@@ -84,7 +117,7 @@ public class QueryGenerator {
     }
 
     public String run(String[] args) throws ParseException, IOException {
-        QueryGenerator qg = new QueryGenerator();
+        TestCase qg = new TestCase();
         if (qg.parseOptions(args)) {
             return qg.getFinalQuery();
         } else {
@@ -93,6 +126,6 @@ public class QueryGenerator {
     }
 
     public static void main(String[] args) throws ParseException, IOException {
-        System.out.print(new QueryGenerator().run(args));
+        System.out.print(new TestCase().run(args));
     }
 }

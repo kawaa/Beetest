@@ -18,13 +18,13 @@ public class QueryGeneratorTest {
 
     @Test
     public void test1() throws IOException, Exception {
-        String query = new QueryGenerator().getSetupQuery(
+        String query = new TestCase().getSetupQuery(
                 "src/main/resources/tests/setup1.hql");
     }
 
     @Test
     public void test2() throws IOException, Exception {
-        String query = new QueryGenerator().getTestedQuery("output",
+        String query = new TestCase().getTestedQuery("output",
                 "src/main/resources/tests/query1.hql");
     }
 
@@ -38,13 +38,12 @@ public class QueryGeneratorTest {
                 + "INSERT OVERWRITE LOCAL DIRECTORY '/tmp/beetest' \n"
                 + "SELECT MAX(length) FROM words;";
         
-        String[] args = {"-t", "words",
-            "-i", "src/main/resources/tests/input1.txt",
+        String[] args = {
             "-e", "src/main/resources/tests/output1.txt",
             "-s", "src/main/resources/tests/setup1.hql",
             "-q", "src/main/resources/tests/query1.hql",
             "-o", "/tmp/beetest",};
-        String query = new QueryGenerator().run(args);
+        String query = new TestCase().run(args);
         // assertEquals(expected, query);
     }
 }
