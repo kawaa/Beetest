@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 /**
  *
@@ -23,7 +24,7 @@ public class Utils {
         return random.nextInt();
     }
 
-    public static int runCommand(String command)
+    public static int runCommand(String command, Logger LOGGER)
             throws IOException, InterruptedException {
         Process p = Runtime.getRuntime().exec(command);
         p.waitFor();
@@ -32,7 +33,7 @@ public class Utils {
                 new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line = reader.readLine();
         while (line != null) {
-            System.out.println(line);
+            LOGGER.info(line);
             line = reader.readLine();
         }
 

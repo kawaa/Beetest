@@ -37,7 +37,7 @@ public class TestQueryExecutor {
 
         String testCaseCommand = getTestCaseCommand(config, queryFilename);
         LOGGER.log(Level.INFO, "Running: {0}", testCaseCommand);
-        Utils.runCommand(testCaseCommand);
+        Utils.runCommand(testCaseCommand, LOGGER);
 
         LOGGER.log(Level.INFO, "Asserting: {0} and {1}",
                 new Object[]{tc.getExpectedFilename(), tc.getOutputFilename()});
