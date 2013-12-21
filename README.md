@@ -86,42 +86,46 @@ We put all files described above into a "artist-count" directory:
 
 ### Running a test
 
-run-test.sh is a basic script that runs a test and verifies the output. 
+run-test.sh is a basic script that runs a test and verifies the output:
 
 	$ ./run-test.sh <path-test-case-directory> <path-to-hive-config>
 
 We run it with following parameters:
 
+	$ mvn3 -P full package
+	$ cd src/examples
 	$ ./run-test.sh artist-count local-config
 
 
-### Local configuration
+Local configuration
+-----
+We want to run a test locally, because we override a couple of Hive settings:
 
-If we want to run a test locally, we need to override a couple of Hive settings. 
-
-	$ ls local-config
-	hive-site.xml
-
-    	<property>
-        	<name>fs.default.name</name>
-        	<value>file:///tmp</value>
-    	</property>
-    	<property>
-        	<name>hive.metastore.warehouse.dir</name>
-        	<value>file:///tmp/warehouse</value>
-    	</property>
-    	<property>
-        	<name>javax.jdo.option.ConnectionURL</name>
-        	<value>jdbc:derby:;databaseName=/tmp/metastore_db;create=true</value>
-    	</property>
-    	<property>
-        	<name>javax.jdo.option.ConnectionDriverName</name>
-        	<value>org.apache.derby.jdbc.EmbeddedDriver</value>
-    	</property>
-    	<property>
-        	<name>mapreduce.framework.name</name>
-        	<value>local</value>
-    	</property>
+	$ cat local-config/hive-site.xml
+	<property>
+		<name>beetest.dir</name>
+		<value>/tmp/beetest/${user.name}</value>
+	</property>
+	<property>
+		<name>fs.default.name</name>
+		<value>file://${beetest.dir}</value>
+	</property>
+	<property>
+		<name>hive.metastore.warehouse.dir</name>
+		<value>file://${beetest.dir}/warehouse</value>
+	</property>
+	<property>
+		<name>javax.jdo.option.ConnectionURL</name>
+		<value>jdbc:derby:;databaseName=${beetest.dir}/metastore_db;create=true</value>
+	</property>
+	<property>
+		<name>javax.jdo.option.ConnectionDriverName</name>
+		<value>org.apache.derby.jdbc.EmbeddedDriver</value>
+	</property>
+	<property>
+		<name>mapreduce.framework.name</name>
+		<value>local</value>
+	</property>
 
 Building project
 -----
