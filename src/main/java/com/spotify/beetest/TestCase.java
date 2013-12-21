@@ -1,7 +1,10 @@
 package com.spotify.beetest;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -123,6 +126,29 @@ public class TestCase {
         } else {
             return null;
         }
+    }
+    
+    public String getOutputFilename() {
+        return getOutputDirectory() + "/000000_0";
+    }
+
+    public String getTestCaseQueryFilename() {
+        String testCaseQueryFilename = "/tmp/beetest-query-"
+                + Utils.getRandomNumber() + ".hql";
+        return testCaseQueryFilename;
+    }
+
+    public void generateTestCaseQueryFile()
+            throws FileNotFoundException, UnsupportedEncodingException,
+            IOException {
+        generateTextFile(getTestCaseQueryFilename(), getFinalQuery());
+    }
+
+    private void generateTextFile(String filename, String content)
+            throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter writer = new PrintWriter(filename, "UTF-8");
+        writer.println(content);
+        writer.close();
     }
 
     public static void main(String[] args) throws ParseException, IOException {

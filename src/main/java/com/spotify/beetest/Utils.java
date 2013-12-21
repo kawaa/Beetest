@@ -60,13 +60,6 @@ public class Utils {
         }
     }
 
-    public static void createTextFile(String filename, String content)
-            throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter(filename, "UTF-8");
-        writer.println(content);
-        writer.close();
-    }
-
     public static boolean deleteFile(String filename) {
         File file = new File(filename);
         return file.delete();
