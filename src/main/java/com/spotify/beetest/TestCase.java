@@ -39,7 +39,7 @@ public final class TestCase {
         setupFilename = StringUtils.join(directory, "/setup.hql");
         queryFilename = StringUtils.join(directory, "/query.hql");
         expectedFilename = StringUtils.join(directory, "/expected");
-        expectedFilename = StringUtils.join(directory, "/output");
+        outputDirectory = StringUtils.join(directory, "/output");
     }
 
     private void setupFromFile(String filename) throws IOException {
