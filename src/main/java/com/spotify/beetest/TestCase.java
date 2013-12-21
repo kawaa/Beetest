@@ -1,5 +1,6 @@
 package com.spotify.beetest;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.StringUtils;
 
 public class TestCase {
 
@@ -18,6 +20,8 @@ public class TestCase {
     private String queryFilename;
     private String expectedFilename;
     private String outputDirectory;
+    private String testCaseQueryFilename = StringUtils.join(
+            "/tmp/beetest-query-", Utils.getRandomNumber(), ".hql");
 
     public TestCase() {
     }
@@ -127,28 +131,33 @@ public class TestCase {
             return null;
         }
     }
-    
+
     public String getOutputFilename() {
         return getOutputDirectory() + "/000000_0";
     }
 
     public String getTestCaseQueryFilename() {
-        String testCaseQueryFilename = "/tmp/beetest-query-"
-                + Utils.getRandomNumber() + ".hql";
         return testCaseQueryFilename;
     }
 
-    public void generateTestCaseQueryFile()
+    public String generateTestCaseQueryFile()
             throws FileNotFoundException, UnsupportedEncodingException,
             IOException {
-        generateTextFile(getTestCaseQueryFilename(), getFinalQuery());
+        generateTextFile(testCaseQueryFilename, getFinalQuery());
+        return testCaseQueryFilename;
     }
 
-    private void generateTextFile(String filename, String content)
+    public boolean deleteTestCaseQueryFile() {
+        File file = new File(testCaseQueryFilename);
+        return file.delete();
+    }
+
+    private String generateTextFile(String filename, String content)
             throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter writer = new PrintWriter(filename, "UTF-8");
         writer.println(content);
         writer.close();
+        return filename;
     }
 
     public static void main(String[] args) throws ParseException, IOException {

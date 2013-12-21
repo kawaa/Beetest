@@ -10,26 +10,32 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.cli.ParseException;
 import junitx.framework.FileAssert;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
  * @author kawaa
  */
-public class QueryExecutor {
+public class TestQueryExecutor {
 
-    private static final Logger LOGGER = Logger.getLogger(QueryExecutor.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(TestQueryExecutor.class.getName());
+    private static boolean deleteTestCaseQueryFile = true;
+    
+    private static String getTestCaseCommand(String config, String queryFilename) {
+        return StringUtils.join("hive --config ", config, " -f ", queryFilename);
+    }
 
     public static void run(String testCaseFilename, String config)
             throws IOException, InterruptedException {
 
         TestCase tc = new TestCase(testCaseFilename);
-        String query = tc.getFinalQuery();
-        String queryFilename = tc.getTestCaseQueryFilename();
-        tc.generateTestCaseQueryFile();
+        
+        String queryFilename = tc.generateTestCaseQueryFile();        
+        
         LOGGER.log(Level.INFO, "Generated query filename: {0}", queryFilename);
-        LOGGER.log(Level.INFO, "Generated query content: {0}", query);
+        LOGGER.log(Level.INFO, "Generated query content: \n{0}", tc.getFinalQuery());
 
-        String testCaseCommand = "hive --config " + config + " -f " + queryFilename;
+        String testCaseCommand = getTestCaseCommand(config, queryFilename);
         LOGGER.log(Level.INFO, "Running: {0}", testCaseCommand);
         Utils.runCommand(testCaseCommand);
 
@@ -38,7 +44,9 @@ public class QueryExecutor {
         FileAssert.assertEquals(new File(tc.getExpectedFilename()),
                 new File(tc.getOutputFilename()));
 
-        Utils.deleteFile(queryFilename);
+        if (deleteTestCaseQueryFile) {
+            tc.deleteTestCaseQueryFile();
+        }
     }
 
     public static void main(String[] args)
