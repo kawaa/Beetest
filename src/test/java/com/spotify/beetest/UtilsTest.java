@@ -5,6 +5,7 @@
 package com.spotify.beetest;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -14,10 +15,11 @@ import static org.junit.Assert.*;
  */
 public class UtilsTest {
 
+    private static final Logger LOGGER = Logger.getLogger(UtilsTest.class.getName());
+    
     @Test
     public void testRunCommandLs() throws IOException, Exception {
-        assertEquals(0,
-                Utils.runCommand("ls src/main/resources/tests/setup1.hql"));
+        assertEquals(0, Utils.runCommand("ls src/main/resources/tests/setup1.hql", LOGGER));
     }
 
     @Test
@@ -25,6 +27,6 @@ public class UtilsTest {
         assertEquals(1,
                 Utils.runCommand("diff "
                 + "src/main/resources/tests/setup1.hql "
-                + "src/main/resources/tests/query1.hql"));
+                + "src/main/resources/tests/query1.hql", LOGGER));
     }
 }
