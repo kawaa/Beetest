@@ -73,9 +73,9 @@ public final class TestCase {
             throws IOException {
         StringBuilder query = new StringBuilder();
 
-        query.append("-- *********************'");
-        query.append("-- a setup query");
-        query.append("-- *********************");
+        query.append("-- *********************\n");
+        query.append("-- a setup query\n");
+        query.append("-- *********************\n");
 
         String fileContent = Utils.readFile(setupFilename);
         query.append(fileContent);
@@ -88,9 +88,9 @@ public final class TestCase {
 
         StringBuilder query = new StringBuilder();
 
-        query.append("-- *********************'");
-        query.append("-- a tested query");
-        query.append("-- *********************");
+        query.append("-- *********************\n");
+        query.append("-- a tested query\n");
+        query.append("-- *********************\n");
         query.append("INSERT OVERWRITE LOCAL DIRECTORY '");
         query.append(outputDir);
         query.append("' \n");

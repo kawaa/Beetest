@@ -23,33 +23,34 @@ and put them into a common directory.
 
 When Beetest is passed a path to this directory, it will run setup.hql and query.hql locally on your machine, write output to a local directory and then compares it with expected output. If computed and expected output differ, then an exception is thrown.
 
-Example
+Example: Top Two Artists
 -----
-Let's assume that we want to implement and test a query that calculates how many times a given artist was streamed at Spotify. Our input dataset is a tab-separated file that contains records with following schema:
+Let's assume that we want to implement and test a query that finds two the most frequently streamed artists at Spotify. Our input dataset is a tab-separated file that contains records with following schema:
 
 	artist <tab> song <tab> user <tab> ts
 
 A record means that a given song by a given artist was streamed by a given user at given time.
 
-### Setup
+### Setup script
 
 In a setup script, 
 * we delete an input table, if it already exists
 * create an input table with an appropriate schema
 * load sample data into an input table (this requires another file with sample data)
 
-	$ cat artist_count/setup.hql
+
+	$ cat artist-count/setup.hql
 	DROP TABLE IF EXISTS streamed_songs;
 
 	CREATE TABLE streamed_songs(artist STRING, song STRING, user STRING, ts TIMESTAMP)
 	ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
 	STORED AS TEXTFILE;
 
-	LOAD DATA LOCAL INPATH 'artist_count/input.tsv' INTO TABLE streamed_songs;
+	LOAD DATA LOCAL INPATH 'artist-count/input.tsv' INTO TABLE streamed_songs;
 
 A file with sample data contains following content:
 
-	$ cat artist_count/input.tsv
+	$ cat artist-count/input.tsv
 	Coldplay	Viva la vida	adam.kawa	2013-01-01 21:20:10
 	Coldplay	Viva la vida	nat.stachura	2013-01-01 21:22:41
 	Oasis	Wonderwall	adam.kawa	2013-01-02 02:33:55
@@ -59,7 +60,9 @@ A file with sample data contains following content:
 
 ### Query
 
-	$ cat artist_count/query.hql 
+We simply want to find two the most frequently streamed artists:
+
+	$ cat artist-count/query.hql 
   	  SELECT artist, COUNT(*) AS cnt
     	    FROM streamed_songs
 	GROUP BY artist
@@ -68,13 +71,57 @@ A file with sample data contains following content:
 
 ### Expected output
 
-	$ cat artist_count/expected 
+Please not that Apache Hive uses Ctrl+A (^A) as a default separator for files (columns) in a text format.
+
+	$ cat artist-count/expected 
 	Coldplay^A3
 	Oasis^A2
 
+### Test case directory
+
+We put all files described above into a "artist-count" directory:
+
+        $ ls artist-count/
+        expected  input.tsv  query.hql  setup.hql
+
 ### Running a test
 
-	$ ./run-test.sh artist_count config
+run-test.sh is a basic script that runs a test and verifies the output. 
+
+	$ ./run-test.sh <path-test-case-directory> <path-to-hive-config>
+
+We run it with following parameters:
+
+	$ ./run-test.sh artist-count local-config
+
+
+### Local configuration
+
+If we want to run a test locally, we need to override a couple of Hive settings. 
+
+	$ ls local-config
+	hive-site.xml
+
+    	<property>
+        	<name>fs.default.name</name>
+        	<value>file:///tmp</value>
+    	</property>
+    	<property>
+        	<name>hive.metastore.warehouse.dir</name>
+        	<value>file:///tmp/warehouse</value>
+    	</property>
+    	<property>
+        	<name>javax.jdo.option.ConnectionURL</name>
+        	<value>jdbc:derby:;databaseName=/tmp/metastore_db;create=true</value>
+    	</property>
+    	<property>
+        	<name>javax.jdo.option.ConnectionDriverName</name>
+        	<value>org.apache.derby.jdbc.EmbeddedDriver</value>
+    	</property>
+    	<property>
+        	<name>mapreduce.framework.name</name>
+        	<value>local</value>
+    	</property>
 
 Building project
 -----
