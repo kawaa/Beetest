@@ -25,10 +25,10 @@ public class TestQueryExecutor {
         return StringUtils.join("hive --config ", config, " -f ", queryFilename);
     }
 
-    public static void run(String testCaseFilename, String config)
+    public static void run(String testCase, String config)
             throws IOException, InterruptedException {
 
-        TestCase tc = new TestCase(testCaseFilename);
+        TestCase tc = new TestCase(testCase);
         
         String queryFilename = tc.generateTestCaseQueryFile();        
         
@@ -43,7 +43,7 @@ public class TestQueryExecutor {
                 new Object[]{tc.getExpectedFilename(), tc.getOutputFilename()});
         FileAssert.assertEquals(new File(tc.getExpectedFilename()),
                 new File(tc.getOutputFilename()));
-
+        
         if (deleteTestCaseQueryFile) {
             tc.deleteTestCaseQueryFile();
         }
@@ -51,8 +51,8 @@ public class TestQueryExecutor {
     
     public static void main(String[] args)
             throws ParseException, IOException, InterruptedException {
-        String testCaseFilename = args[0];
+        String testCase = args[0];
         String config = args[1];
-        run(testCaseFilename, config);
+        run(testCase, config);
     }
 }

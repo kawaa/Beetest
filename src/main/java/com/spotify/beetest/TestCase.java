@@ -21,7 +21,7 @@ public final class TestCase {
     private String expectedFilename;
     private String outputDirectory;
     private String testCaseQueryFilename = StringUtils.join(
-            "/tmp/beetest-query-", Utils.getRandomNumber(), ".hql");
+            "/tmp/beetest-query-", Utils.getRandomPositiveNumber(), ".hql");
 
     public TestCase() {
     }
@@ -71,7 +71,16 @@ public final class TestCase {
 
     public String getSetupQuery(String setupFilename)
             throws IOException {
-        return Utils.readFile(setupFilename);
+        StringBuilder query = new StringBuilder();
+
+        query.append("-- *********************'");
+        query.append("-- a setup query");
+        query.append("-- *********************");
+
+        String fileContent = Utils.readFile(setupFilename);
+        query.append(fileContent);
+
+        return query.toString();
     }
 
     public String getTestedQuery(String outputDir,
@@ -79,6 +88,9 @@ public final class TestCase {
 
         StringBuilder query = new StringBuilder();
 
+        query.append("-- *********************'");
+        query.append("-- a tested query");
+        query.append("-- *********************");
         query.append("INSERT OVERWRITE LOCAL DIRECTORY '");
         query.append(outputDir);
         query.append("' \n");

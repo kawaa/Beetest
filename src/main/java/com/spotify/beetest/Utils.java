@@ -20,8 +20,8 @@ public class Utils {
 
     private static Random random = new Random();
 
-    public static int getRandomNumber() {
-        return random.nextInt();
+    public static int getRandomPositiveNumber() {
+        return (random.nextInt() & Integer.MAX_VALUE);
     }
 
     public static int runCommand(String command, Logger LOGGER)
