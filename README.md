@@ -25,7 +25,7 @@ When Beetest is passed a path to this directory, it will run setup.hql and query
 
 Example: Top Two Artists
 -----
-Let's assume that we want to implement and test a query that finds two the most frequently streamed artists at Spotify. Our input dataset is a tab-separated file that contains records with following schema:
+Assume that we want to implement and test a query that finds two the most frequently streamed artists at Spotify. Our input dataset is a tab-separated file that contains records with following schema:
 
 	artist <tab> song <tab> user <tab> ts
 
@@ -33,11 +33,12 @@ A record means that a given song by a given artist was streamed by a given user 
 
 ### Setup script
 
-In a setup script, 
-* we delete an input table, if it already exists
-* create an input table with an appropriate schema
+In a setup script,
+* we delete an input table, if it already exists,
+* create an input table with an appropriate schema,
 * load sample data into an input table (this requires another file with sample data)
 
+It might have a following content:
 
 	$ cat artist-count/setup.hql
 	DROP TABLE IF EXISTS streamed_songs;
@@ -48,7 +49,7 @@ In a setup script,
 
 	LOAD DATA LOCAL INPATH 'artist-count/input.tsv' INTO TABLE streamed_songs;
 
-A file with sample data contains following content:
+A file with sample data contains a following content:
 
 	$ cat artist-count/input.tsv
 	Coldplay	Viva la vida	adam.kawa	2013-01-01 21:20:10
@@ -81,8 +82,8 @@ Please not that Apache Hive uses Ctrl+A (^A) as a default separator for files (c
 
 We put all files described above into a "artist-count" directory:
 
-        $ ls artist-count/
-        expected  input.tsv  query.hql  setup.hql
+	$ ls artist-count/
+	expected  input.tsv  query.hql  setup.hql
 
 ### Running a test
 
