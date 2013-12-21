@@ -48,7 +48,7 @@ public class TestQueryExecutor {
             tc.deleteTestCaseQueryFile();
         }
     }
-
+    
     public static void main(String[] args)
             throws ParseException, IOException, InterruptedException {
         String testCaseFilename = args[0];

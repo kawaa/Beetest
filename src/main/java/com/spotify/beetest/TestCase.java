@@ -14,7 +14,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 
-public class TestCase {
+public final class TestCase {
 
     private String setupFilename;
     private String queryFilename;
@@ -26,16 +26,31 @@ public class TestCase {
     public TestCase() {
     }
 
-    public TestCase(String filename) throws IOException {
-        Properties prop = new Properties();
+    public TestCase(String path) throws IOException {
+        boolean isDirectory = (new File(path)).isDirectory();
+        if (isDirectory) {
+            setupFromDirectory(path);
+        } else {
+            setupFromFile(path);
+        }
+    }
 
+    private void setupFromDirectory(String directory) {
+        setupFilename = StringUtils.join(directory, "/setup.hql");
+        queryFilename = StringUtils.join(directory, "/query.hql");
+        expectedFilename = StringUtils.join(directory, "/expected");
+        expectedFilename = StringUtils.join(directory, "/output");
+    }
+
+    private void setupFromFile(String filename) throws IOException {
+        Properties prop = new Properties();
         //load a properties file
         prop.load(new FileInputStream(filename));
-
         setupFilename = prop.getProperty("s");
         queryFilename = prop.getProperty("q");
         expectedFilename = prop.getProperty("e");
         outputDirectory = prop.getProperty("o");
+
     }
 
     public TestCase(String setupFilename, String queryFilename,
