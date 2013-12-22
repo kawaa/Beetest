@@ -1,7 +1,8 @@
 Beetest
 =======
 
-Beetest is a super simple utility that helps you test your Apache Hive script without any Java knowledge.
+Beetest is a super simple utility for testing Apache Hive scripts locally for non-Java developers.
+Beetest has been tested on Hadoop 2.2.0 (YARN) and Hive 0.12.0.
 
 Motivation
 ----------
@@ -21,15 +22,19 @@ To write a unit test, a user simply provides 3 files:
 
 and put them into a common directory.
 
-When Beetest is passed a path to this directory, it will run setup.hql and query.hql locally on your machine, write output to a local directory and then compares it with expected output. If computed and expected output differ, then an exception is thrown.
+When Beetest is passed a path to this directory, it will run setup.hql and query.hql scripts locally on your machine, write an output to a local directory and then compares it with expected output. If computed and expected output differ, then an exception is thrown.
 
-Example: Top Two Artists
+Example: Two most popular artists
 -----
-Assume that we want to implement and test a query that finds two the most frequently streamed artists at Spotify. Our input dataset is a tab-separated file that contains records with following schema:
+Let's see Beetest in action!
 
-	artist <tab> song <tab> user <tab> ts
+Assume that we need to implement and test a Hive query that finds two the most frequently streamed artists at Spotify. Our input dataset is a tab-separated file that contains records with following schema:
 
-A record means that a given song by a given artist was streamed by a given user at given time.
+	artist <tab> song <tab> user <tab> timestamp
+
+A single record simply means that a given song by a given artist was streamed by a given user at given point of time.
+
+According to the information in a previous section, we need to prepare a setup and query scripts and a file with expected output.
 
 ### Setup script
 
@@ -38,7 +43,7 @@ In a setup script,
 * create an input table with an appropriate schema,
 * load sample data into an input table (this requires another file with sample data)
 
-It might have a following content:
+Having above in mind, our setup script might have a following content:
 
 	$ cat artist-count/setup.hql
 	DROP TABLE IF EXISTS streamed_songs;
@@ -49,7 +54,7 @@ It might have a following content:
 
 	LOAD DATA LOCAL INPATH 'artist-count/input.tsv' INTO TABLE streamed_songs;
 
-A file with sample data contains a following content:
+Since we use 'artist-count/input.tsv' file in our setup script, we need to create this file as well.
 
 	$ cat artist-count/input.tsv
 	Coldplay	Viva la vida	adam.kawa	2013-01-01 21:20:10
@@ -61,7 +66,7 @@ A file with sample data contains a following content:
 
 ### Query
 
-We simply want to find two the most frequently streamed artists:
+Since out input dataset is really small, it is very easy to produce a file with an expected output. Please not that Apache Hive uses Ctrl+A (^A) as a default separator for files (columns) in a text format.
 
 	$ cat artist-count/query.hql 
   	  SELECT artist, COUNT(*) AS cnt
@@ -80,27 +85,31 @@ Please not that Apache Hive uses Ctrl+A (^A) as a default separator for files (c
 
 ### Test case directory
 
-We put all files described above into a "artist-count" directory:
+We put all files described above into "artist-count" directory:
 
 	$ ls artist-count/
 	expected  input.tsv  query.hql  setup.hql
 
 ### Running a test
 
+We are very close to start testing our script! ;)
+
 run-test.sh is a basic script that runs a test and verifies the output:
 
+	$ cd src/examples
 	$ ./run-test.sh <path-test-case-directory> <path-to-hive-config>
 
-We run it with following parameters:
+We run test with following parameters:
 
-	$ mvn3 -P full package
-	$ cd src/examples
 	$ ./run-test.sh artist-count local-config
 
+Please note that Beetest's jar must be build before running a test. You can do it by typing a following command in a top-level directory:
+
+	$ mvn3 -P full package
 
 Local configuration
 -----
-We want to run a test locally, because we override a couple of Hive settings:
+We run a test locally, because we override a couple of Hive settings:
 
 	$ cat local-config/hive-site.xml
 	<property>
@@ -133,4 +142,3 @@ Building project
 	https://github.com/kawaa/Beetest.git
 	cd Beetest
 	mvn3 -P full package
-
