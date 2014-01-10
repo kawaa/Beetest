@@ -1,7 +1,7 @@
 Beetest
 =======
 
-Beetest is a super simple utility for testing Apache Hive scripts locally for non-Java developers.
+Beetest is a simple utility for local testing of Apache Hive scripts for non-Java developers.
 Beetest has been tested on Hadoop 2.2.0 (YARN) and Hive 0.12.0.
 
 Motivation
@@ -66,8 +66,6 @@ Since we use 'artist-count/input.tsv' file in our setup script, we need to creat
 
 ### Query
 
-Since out input dataset is really small, it is very easy to produce a file with an expected output. Please not that Apache Hive uses Ctrl+A (^A) as a default separator for files (columns) in a text format.
-
 	$ cat artist-count/query.hql 
   	  SELECT artist, COUNT(*) AS cnt
     	    FROM streamed_songs
@@ -77,7 +75,7 @@ Since out input dataset is really small, it is very easy to produce a file with 
 
 ### Expected output
 
-Please not that Apache Hive uses Ctrl+A (^A) as a default separator for files (columns) in a text format.
+Since out input dataset is really small, it is very easy to produce a file with an expected output. Please not that Apache Hive uses Ctrl+A (^A) as a default separator for files (columns) in a text format.
 
 	$ cat artist-count/expected 
 	Coldplay^A3
@@ -96,16 +94,15 @@ We are very close to start testing our script! ;)
 
 run-test.sh is a basic script that runs a test and verifies the output:
 
+        $ git clone https://github.com/kawaa/Beetest.git
+        $ cd Beetest
+        $ mvn3 -P full package
 	$ cd src/examples
 	$ ./run-test.sh <path-test-case-directory> <path-to-hive-config>
 
 We run test with following parameters:
 
 	$ ./run-test.sh artist-count local-config
-
-Please note that Beetest's jar must be build before running a test. You can do it by typing a following command in a top-level directory:
-
-	$ mvn3 -P full package
 
 Local configuration
 -----
@@ -136,9 +133,3 @@ We run a test locally, because we override a couple of Hive settings:
 		<name>mapreduce.framework.name</name>
 		<value>local</value>
 	</property>
-
-Building project
------
-	https://github.com/kawaa/Beetest.git
-	cd Beetest
-	mvn3 -P full package
