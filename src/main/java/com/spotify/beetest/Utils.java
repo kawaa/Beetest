@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Logger;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 /**
  *
@@ -74,8 +77,9 @@ public class Utils {
         }
     }
 
-    public static boolean deleteFile(String filename) {
-        File file = new File(filename);
-        return file.delete();
+    public static boolean deletePath(String filename) throws IOException {
+        FileSystem fs = FileSystem.get(new Configuration());
+        return fs.delete(new Path(filename), true);
     }
+    
 }

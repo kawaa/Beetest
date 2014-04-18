@@ -113,9 +113,6 @@ public final class TestCase {
 
         StringBuilder query = new StringBuilder();
 
-        query.append("-- *********************\n");
-        query.append("-- a tested query\n");
-        query.append("-- *********************\n");
         query.append("INSERT OVERWRITE LOCAL DIRECTORY '");
         query.append(outputDir);
         query.append("' \n");

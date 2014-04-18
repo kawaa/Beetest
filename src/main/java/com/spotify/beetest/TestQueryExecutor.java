@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.spotify.beetest;
 
 import java.io.File;
@@ -25,8 +21,13 @@ public class TestQueryExecutor {
         return StringUtils.join("hive --config ", config, " -f ", queryFilename);
     }
 
-    public static void run(String testCase, String config)
+    public static void run(String testCase, String config, String beetestDir)
             throws IOException, InterruptedException {
+        
+        if (beetestDir != null) {
+            LOGGER.log(Level.INFO, "Removing a directory: {0}", beetestDir);
+            Utils.deletePath(beetestDir);
+        }
 
         TestCase tc = new TestCase(testCase);
         
@@ -41,6 +42,7 @@ public class TestQueryExecutor {
 
         LOGGER.log(Level.INFO, "Asserting: {0} and {1}",
                 new Object[]{tc.getExpectedFilename(), tc.getOutputFilename()});
+        
         FileAssert.assertEquals(new File(tc.getExpectedFilename()),
                 new File(tc.getOutputFilename()));
         
@@ -51,8 +53,11 @@ public class TestQueryExecutor {
     
     public static void main(String[] args)
             throws ParseException, IOException, InterruptedException {
+        
         String testCase = args[0];
         String config = args[1];
-        run(testCase, config);
+        String beetestDir = (args.length > 2) ? args[2] : null;
+        
+        run(testCase, config, beetestDir);
     }
 }
