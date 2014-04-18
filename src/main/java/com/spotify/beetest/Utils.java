@@ -8,6 +8,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Logger;
@@ -30,7 +32,8 @@ public class Utils {
         p.waitFor();
 
         BufferedReader reader =
-                new BufferedReader(new InputStreamReader(p.getInputStream()));
+                new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
         String line = reader.readLine();
         while (line != null) {
             LOGGER.info(line);
@@ -41,7 +44,6 @@ public class Utils {
     }
 
     public static String readFile(String pathname) throws IOException {
-
         File file = new File(pathname);
         StringBuilder fileContents = new StringBuilder((int) file.length());
         Scanner scanner = new Scanner(file);
@@ -53,6 +55,20 @@ public class Utils {
                 fileContents.append(lineSeparator);
             }
             return fileContents.toString();
+        } finally {
+            scanner.close();
+        }
+    }
+
+    public static List<String> fileToList(String pathname) throws IOException {
+        File file = new File(pathname);
+        Scanner scanner = new Scanner(file);
+        List<String> list = new ArrayList<String>();
+        try {
+            while (scanner.hasNextLine()) {
+                list.add(scanner.nextLine());
+            }
+            return list;
         } finally {
             scanner.close();
         }

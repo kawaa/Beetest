@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Properties;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 public final class TestCase {
 
     private String setupFilename;
+    private String shortSetupFilename;
     private String queryFilename;
     private String expectedFilename;
     private String outputDirectory;
@@ -36,7 +38,12 @@ public final class TestCase {
     }
 
     private void setupFromDirectory(String directory) {
-        setupFilename = StringUtils.join(directory, "/setup.hql");
+        if (new File(StringUtils.join(directory, "/ssetup.hql")).exists()) {
+            shortSetupFilename = StringUtils.join(directory, "/ssetup.hql");
+        }
+        if (new File(StringUtils.join(directory, "/setup.hql")).exists()) {
+            setupFilename = StringUtils.join(directory, "/setup.hql");
+        }
         queryFilename = StringUtils.join(directory, "/query.hql");
         expectedFilename = StringUtils.join(directory, "/expected");
         outputDirectory = StringUtils.join(directory, "/output");
@@ -46,6 +53,7 @@ public final class TestCase {
         Properties prop = new Properties();
         //load a properties file
         prop.load(new FileInputStream(filename));
+        shortSetupFilename = prop.getProperty("ss");
         setupFilename = prop.getProperty("s");
         queryFilename = prop.getProperty("q");
         expectedFilename = prop.getProperty("e");
@@ -53,8 +61,9 @@ public final class TestCase {
 
     }
 
-    public TestCase(String setupFilename, String queryFilename,
+    public TestCase(String shortSetupFilename, String setupFilename, String queryFilename,
             String expectedFilename, String outputDir) {
+        this.shortSetupFilename = shortSetupFilename;
         this.setupFilename = setupFilename;
         this.queryFilename = queryFilename;
         this.expectedFilename = expectedFilename;
@@ -69,17 +78,33 @@ public final class TestCase {
         return outputDirectory;
     }
 
-    public String getSetupQuery(String setupFilename)
+    public String getShortSetupQuery(String shortSetupFilename)
             throws IOException {
         StringBuilder query = new StringBuilder();
 
-        query.append("-- *********************\n");
-        query.append("-- a setup query\n");
-        query.append("-- *********************\n");
+        List<String> fileContent = Utils.fileToList(shortSetupFilename);
+        for (String line : fileContent) {
+            String[] parts = line.split("\t");
+            String tableName = parts[0];
+            String tableSchema = parts[1];
+            String inputPath = parts[2];
+            
+            String initTable = StringUtils.join("CREATE TABLE ", tableName,
+                    tableSchema, "\nROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';",
+                    "\nLOAD DATA LOCAL INPATH '", inputPath, "' INTO TABLE ",
+                    tableName, ";\n");
 
+            query.append(initTable);
+        }
+
+        return query.toString();
+    }
+
+    public String getSetupQuery(String setupFilename)
+            throws IOException {
+        StringBuilder query = new StringBuilder();
         String fileContent = Utils.readFile(setupFilename);
         query.append(fileContent);
-
         return query.toString();
     }
 
@@ -102,12 +127,16 @@ public final class TestCase {
     }
 
     public String getFinalQuery() throws IOException {
-        return getSetupQuery(setupFilename)
-                + getTestedQuery(outputDirectory, queryFilename);
+        String shortSetup = (shortSetupFilename != null
+                ? getShortSetupQuery(shortSetupFilename) : "");
+        String setup = (setupFilename != null
+                ? getSetupQuery(setupFilename) : "");
+        return shortSetup + setup + getTestedQuery(outputDirectory, queryFilename);
     }
 
     public Options getOptions() {
         Options options = new Options();
+        options.addOption("ss", true, "specify a short setup file");
         options.addOption("s", true, "specify a setup file");
         options.addOption("q", true, "specify a query file");
         options.addOption("e", true, "specify an expected output file");
@@ -124,9 +153,9 @@ public final class TestCase {
         CommandLine cmd = parser.parse(options, args);
         if (cmd.hasOption("s")) {
             setupFilename = cmd.getOptionValue("s");
-        } else {
-            System.err.println("Option -s (setupFilename) is mandatory");
-            validArgs = false;
+        }
+        if (cmd.hasOption("ss")) {
+            shortSetupFilename = cmd.getOptionValue("ss");
         }
         if (cmd.hasOption("q")) {
             queryFilename = cmd.getOptionValue("q");

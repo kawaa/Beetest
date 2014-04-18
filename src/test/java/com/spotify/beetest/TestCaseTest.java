@@ -12,24 +12,30 @@ import static org.junit.Assert.*;
  *
  * @author kawaa
  */
-public class QueryGeneratorTest {
+public class TestCaseTest {
 
     String resourcesDir = "src/main/resources";
 
     @Test
-    public void test1() throws IOException, Exception {
+    public void testSetup() throws IOException, Exception {
         String query = new TestCase().getSetupQuery(
                 "src/main/resources/tests/setup1.hql");
+        assertEquals(query, "CREATE TABLE words(word STRING, length INT)\n"
+                + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t'\n"
+                + "STORED AS TEXTFILE;\n");
     }
 
     @Test
-    public void test2() throws IOException, Exception {
-        String query = new TestCase().getTestedQuery("output",
-                "src/main/resources/tests/query1.hql");
+    public void testShortSetup() throws IOException, Exception {
+        String query = new TestCase().getShortSetupQuery(
+                "src/main/resources/tests/ssetup1.hql");
+        assertEquals(query, "CREATE TABLE words(word STRING, length INT)"
+                + "\nROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';"
+                + "\nLOAD DATA LOCAL INPATH 'input1.txt' INTO TABLE words;\n");
     }
 
     @Test
-    public void test3() throws IOException, Exception {
+    public void test4() throws IOException, Exception {
         String expected = "DROP TABLE IF EXISTS words;\n"
                 + "CREATE TABLE words(word STRING, length INT)\n"
                 + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t'\n"
@@ -37,7 +43,7 @@ public class QueryGeneratorTest {
                 + "LOAD DATA LOCAL INPATH 'src/main/resources/tests/input1.txt' OVERWRITE INTO TABLE words;\n"
                 + "INSERT OVERWRITE LOCAL DIRECTORY '/tmp/beetest' \n"
                 + "SELECT MAX(length) FROM words;";
-        
+
         String[] args = {
             "-e", "src/main/resources/tests/output1.txt",
             "-s", "src/main/resources/tests/setup1.hql",
