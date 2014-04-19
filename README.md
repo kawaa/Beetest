@@ -64,6 +64,12 @@ Since we use 'artist-count/input.tsv' file in our setup script, we need to creat
 	Oasis	Wonderwall	dog.tofi	2013-01-02 22:17:51
 	Aerosmith	Crazy	natalia.stachura	2013-01-02 23:48:31
 
+Note: In future versions of Beetest, a simpler version of a setup script will be also supported. It will have a following schema:
+
+	<table-name><tab><table-schema><tab><input-file>
+
+Then, Beetest will parse a file with such a schema, and create a <table-name> with <table-schema> that stores records as tab-separated file. Then it will load <input-file> into <table-name>. 
+
 ### Query
 
 	$ cat artist-count/query.hql 
@@ -75,11 +81,13 @@ Since we use 'artist-count/input.tsv' file in our setup script, we need to creat
 
 ### Expected output
 
-Since out input dataset is really small, it is very easy to produce a file with an expected output. Please not that Apache Hive uses Ctrl+A (^A) as a default separator for files (columns) in a text format.
+Since out input dataset is really small, it is very easy to produce a file with an expected output. Please note that Apache Hive uses Ctrl+A (^A) as a default separator for files (columns) in a text format.
 
 	$ cat artist-count/expected 
 	Coldplay^A3
 	Oasis^A2
+
+Note: Using a custom separator (a different than Ctrl+A (^A)), will be supported in the future versions of Beetest.
 
 ### Test case directory
 
@@ -94,9 +102,9 @@ We are very close to start testing our script! ;)
 
 run-test.sh is a basic script that runs a test and verifies the output:
 
-        $ git clone https://github.com/kawaa/Beetest.git
-        $ cd Beetest
-        $ mvn3 -P full package
+	$ git clone https://github.com/kawaa/Beetest.git
+	$ cd Beetest
+	$ mvn3 -P full package
 	$ cd src/examples
 	$ ./run-test.sh <path-test-case-directory> <path-to-hive-config>
 
