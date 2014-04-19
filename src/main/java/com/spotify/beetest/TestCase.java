@@ -22,6 +22,7 @@ public final class TestCase {
     private String queryFilename;
     private String expectedFilename;
     private String outputDirectory;
+    private String databaseName = "beetest";
     private String testCaseQueryFilename = StringUtils.join(
             "/tmp/beetest-query-", Utils.getRandomPositiveNumber(), ".hql");
 
@@ -124,11 +125,19 @@ public final class TestCase {
     }
 
     public String getFinalQuery() throws IOException {
+        // own database
+        String databaseQuery = StringUtils.join("CREATE DATABASE IF NOT EXISTS ",
+                databaseName, ";", "USE ", databaseName ,";");
+        
+        // setup
         String shortSetup = (shortSetupFilename != null
                 ? getShortSetupQuery(shortSetupFilename) : "");
         String setup = (setupFilename != null
                 ? getSetupQuery(setupFilename) : "");
-        return shortSetup + setup + getTestedQuery(outputDirectory, queryFilename);
+        
+        // final query
+        return StringUtils.join(databaseQuery, shortSetup, setup,
+                getTestedQuery(outputDirectory, queryFilename));
     }
 
     public Options getOptions() {
