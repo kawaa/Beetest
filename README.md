@@ -58,11 +58,11 @@ Since we use 'artist-count/input.tsv' file in our setup script, we need to creat
 
 	$ cat artist-count/input.tsv
 	Coldplay	Viva la vida	adam.kawa	2013-01-01 21:20:10
-	Coldplay	Viva la vida	nat.stachura	2013-01-01 21:22:41
+	Coldplay	Viva la vida	natalia.stachura	2013-01-01 21:22:41
 	Oasis	Wonderwall	adam.kawa	2013-01-02 02:33:55
 	Coldplay	Yelllow	adam.kawa	2013-01-02 14:10:01
 	Oasis	Wonderwall	dog.tofi	2013-01-02 22:17:51
-	Aerosmith	Crazy	nat.stachura	2013-01-02 23:48:31
+	Aerosmith	Crazy	natalia.stachura	2013-01-02 23:48:31
 
 ### Query
 
@@ -103,6 +103,13 @@ run-test.sh is a basic script that runs a test and verifies the output:
 We run test with following parameters:
 
 	$ ./run-test.sh artist-count local-config
+
+Test isolations
+-----
+
+Beetests will create own database (if it already does not exists) called "beetest" and create all tables there. This have two advantages:
+* we can use the same name of tables as in the production system
+* if we drop (accidentally or not) a table during unit testing, a testing table will be dropped and production tables will be untouched.
 
 Local configuration
 -----

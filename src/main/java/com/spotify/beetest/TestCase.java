@@ -25,6 +25,9 @@ public final class TestCase {
     private String databaseName = "beetest";
     private String testCaseQueryFilename = StringUtils.join(
             "/tmp/beetest-query-", Utils.getRandomPositiveNumber(), ".hql");
+    
+    private static String NL = "\n";
+    private static String TAB = "\t";
 
     public TestCase() {
     }
@@ -85,15 +88,15 @@ public final class TestCase {
 
         List<String> fileContent = Utils.fileToList(shortSetupFilename);
         for (String line : fileContent) {
-            String[] parts = line.split("\t");
+            String[] parts = line.split(TAB);
             String tableName = parts[0];
             String tableSchema = parts[1];
             String inputPath = parts[2];
             
-            String initTable = StringUtils.join("CREATE TABLE ", tableName,
-                    tableSchema, "\nROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';",
-                    "\nLOAD DATA LOCAL INPATH '", inputPath, "' INTO TABLE ",
-                    tableName, ";\n");
+            String initTable = StringUtils.join("CREATE TABLE ", tableName, tableSchema,
+                    NL, "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';",
+                    NL, "LOAD DATA LOCAL INPATH '", inputPath, "' INTO TABLE ",
+                    tableName, ";", NL);
 
             query.append(initTable);
         }
@@ -116,7 +119,8 @@ public final class TestCase {
 
         query.append("INSERT OVERWRITE LOCAL DIRECTORY '");
         query.append(outputDir);
-        query.append("' \n");
+        query.append("'");
+        query.append(NL);
 
         String fileContent = Utils.readFile(queryFilename);
         query.append(fileContent);
@@ -127,7 +131,7 @@ public final class TestCase {
     public String getFinalQuery() throws IOException {
         // own database
         String databaseQuery = StringUtils.join("CREATE DATABASE IF NOT EXISTS ",
-                databaseName, ";", "USE ", databaseName ,";");
+                databaseName, ";", NL, "USE ", databaseName ,";", NL);
         
         // setup
         String shortSetup = (shortSetupFilename != null
