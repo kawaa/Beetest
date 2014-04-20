@@ -17,15 +17,15 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class TestCase {
 
-    private String setupFilename;
-    private String shortSetupFilename;
+    private String ddlSetupFilename;
     private String queryFilename;
+    private String selectFilename;
     private String expectedFilename;
     private String outputDirectory;
+
     private String databaseName = "beetest";
     private String testCaseQueryFilename = StringUtils.join(
             "/tmp/beetest-query-", Utils.getRandomPositiveNumber(), ".hql");
-    
     private static String NL = "\n";
     private static String TAB = "\t";
 
@@ -42,13 +42,13 @@ public final class TestCase {
     }
 
     private void setupFromDirectory(String directory) {
-        if (new File(StringUtils.join(directory, "/ssetup.hql")).exists()) {
-            shortSetupFilename = StringUtils.join(directory, "/ssetup.hql");
+        if (new File(StringUtils.join(directory, "/setup.ddl")).exists()) {
+            ddlSetupFilename = StringUtils.join(directory, "/setup.ddl");
         }
-        if (new File(StringUtils.join(directory, "/setup.hql")).exists()) {
-            setupFilename = StringUtils.join(directory, "/setup.hql");
+        if (new File(StringUtils.join(directory, "/query.hql")).exists()) {
+            queryFilename = StringUtils.join(directory, "/query.hql");
         }
-        queryFilename = StringUtils.join(directory, "/query.hql");
+        selectFilename = StringUtils.join(directory, "/select.hql");
         expectedFilename = StringUtils.join(directory, "/expected");
         outputDirectory = StringUtils.join(directory, "/output");
     }
@@ -57,18 +57,18 @@ public final class TestCase {
         Properties prop = new Properties();
         //load a properties file
         prop.load(new FileInputStream(filename));
-        shortSetupFilename = prop.getProperty("ss");
-        setupFilename = prop.getProperty("s");
+        ddlSetupFilename = prop.getProperty("ds");
+        selectFilename = prop.getProperty("s");
         queryFilename = prop.getProperty("q");
         expectedFilename = prop.getProperty("e");
         outputDirectory = prop.getProperty("o");
 
     }
 
-    public TestCase(String shortSetupFilename, String setupFilename, String queryFilename,
+    public TestCase(String ddlSetupFilename, String queryFilename, String selectFilename,
             String expectedFilename, String outputDir) {
-        this.shortSetupFilename = shortSetupFilename;
-        this.setupFilename = setupFilename;
+        this.ddlSetupFilename = ddlSetupFilename;
+        this.selectFilename = selectFilename;
         this.queryFilename = queryFilename;
         this.expectedFilename = expectedFilename;
         this.outputDirectory = outputDir;
@@ -82,38 +82,29 @@ public final class TestCase {
         return outputDirectory;
     }
 
-    public String getShortSetupQuery(String shortSetupFilename)
+    public String getDDLSetupQuery(String ddlSetupFilename)
             throws IOException {
         StringBuilder query = new StringBuilder();
 
-        List<String> fileContent = Utils.fileToList(shortSetupFilename);
+        List<String> fileContent = Utils.fileToList(ddlSetupFilename);
         for (String line : fileContent) {
             String[] parts = line.split(TAB);
             String tableName = parts[0];
             String tableSchema = parts[1];
             String inputPath = parts[2];
-            
+
             String initTable = StringUtils.join("CREATE TABLE ", tableName, tableSchema,
                     NL, "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';",
                     NL, "LOAD DATA LOCAL INPATH '", inputPath, "' INTO TABLE ",
                     tableName, ";", NL);
-
             query.append(initTable);
         }
 
         return query.toString();
     }
 
-    public String getSetupQuery(String setupFilename)
-            throws IOException {
-        StringBuilder query = new StringBuilder();
-        String fileContent = Utils.readFile(setupFilename);
-        query.append(fileContent);
-        return query.toString();
-    }
-
     public String getTestedQuery(String outputDir,
-            String queryFilename) throws IOException {
+            String selectFilename) throws IOException {
 
         StringBuilder query = new StringBuilder();
 
@@ -122,32 +113,31 @@ public final class TestCase {
         query.append("'");
         query.append(NL);
 
-        String fileContent = Utils.readFile(queryFilename);
+        String fileContent = Utils.readFile(selectFilename);
         query.append(fileContent);
-
         return query.toString();
     }
 
     public String getFinalQuery() throws IOException {
         // own database
         String databaseQuery = StringUtils.join("CREATE DATABASE IF NOT EXISTS ",
-                databaseName, ";", NL, "USE ", databaseName ,";", NL);
-        
+                databaseName, ";", NL, "USE ", databaseName, ";", NL);
+
         // setup
-        String shortSetup = (shortSetupFilename != null
-                ? getShortSetupQuery(shortSetupFilename) : "");
-        String setup = (setupFilename != null
-                ? getSetupQuery(setupFilename) : "");
-        
+        String ddlSetup = (ddlSetupFilename != null
+                ? getDDLSetupQuery(ddlSetupFilename) : "");
+        String query = (queryFilename != null
+                ? Utils.readFile(queryFilename) : "");
+
         // final query
-        return StringUtils.join(databaseQuery, shortSetup, setup,
-                getTestedQuery(outputDirectory, queryFilename));
+        return StringUtils.join(databaseQuery, ddlSetup, query,
+                getTestedQuery(outputDirectory, selectFilename));
     }
 
     public Options getOptions() {
         Options options = new Options();
-        options.addOption("ss", true, "specify a short setup file");
-        options.addOption("s", true, "specify a setup file");
+        options.addOption("ds", true, "specify a DDL setup file");
+        options.addOption("s", true, "specify a select file");
         options.addOption("q", true, "specify a query file");
         options.addOption("e", true, "specify an expected output file");
         options.addOption("o", true, "specify an output directory");
@@ -161,16 +151,18 @@ public final class TestCase {
         Options options = getOptions();
         CommandLineParser parser = new BasicParser();
         CommandLine cmd = parser.parse(options, args);
-        if (cmd.hasOption("s")) {
-            setupFilename = cmd.getOptionValue("s");
-        }
-        if (cmd.hasOption("ss")) {
-            shortSetupFilename = cmd.getOptionValue("ss");
+        
+        if (cmd.hasOption("ds")) {
+            ddlSetupFilename = cmd.getOptionValue("ds");
         }
         if (cmd.hasOption("q")) {
             queryFilename = cmd.getOptionValue("q");
+        }
+        
+        if (cmd.hasOption("s")) {
+            selectFilename = cmd.getOptionValue("s");
         } else {
-            System.err.println("Option -q (queryFilename) is mandatory");
+            System.err.println("Option -s (selectFilename) is mandatory");
             validArgs = false;
         }
         if (cmd.hasOption("e")) {

@@ -17,12 +17,6 @@ public class QueryGeneratorTest {
     String resourcesDir = "src/main/resources";
 
     @Test
-    public void test1() throws IOException, Exception {
-        String query = new TestCase().getSetupQuery(
-                "src/main/resources/tests/setup1.hql");
-    }
-
-    @Test
     public void test2() throws IOException, Exception {
         String query = new TestCase().getTestedQuery("output",
                 "src/main/resources/tests/query1.hql");

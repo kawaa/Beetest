@@ -30,7 +30,7 @@ Let's see Beetest in action!
 
 Assume that we need to implement and test a Hive query that finds two the most frequently streamed artists at Spotify. Our input dataset is a tab-separated file that contains records with following schema:
 
-	artist <tab> song <tab> user <tab> timestamp
+	artist<tab>song<tab>user<tab>timestamp
 
 A single record simply means that a given song by a given artist was streamed by a given user at given point of time.
 
@@ -112,10 +112,10 @@ We run test with following parameters:
 
 	$ ./run-test.sh artist-count local-config
 
-Test isolations
+Test isolation
 -----
 
-Beetests will create own database (if it already does not exists) called "beetest" and create all tables there. This have two advantages:
+Beetest will create own database (if it already does not exists) called "beetest" and create all tables there. This have two advantages:
 * we can use the same name of tables as in the production system
 * if we drop (accidentally or not) a table during unit testing, a testing table will be dropped and production tables will be untouched.
 
