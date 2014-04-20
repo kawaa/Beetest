@@ -65,7 +65,7 @@
     <property>
         <name>hive.mapred.mode</name>
         <description>
-            The mode in which the hive operations are being performed. 
+            The mode in which the hive operations are being performed.
             In strict mode, some risky queries are not allowed to run. They include:
             Cartesian Product.
             No partition being picked up for a query.

@@ -93,7 +93,8 @@ public final class TestCase {
             String tableSchema = parts[1];
             String inputPath = parts[2];
 
-            String initTable = StringUtils.join("CREATE TABLE ", tableName, tableSchema,
+            String initTable = StringUtils.join("DROP TABLE IF EXISTS ", tableName, ";",
+                    NL, "CREATE TABLE ", tableName, tableSchema,
                     NL, "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';",
                     NL, "LOAD DATA LOCAL INPATH '", inputPath, "' INTO TABLE ",
                     tableName, ";", NL);
@@ -151,14 +152,14 @@ public final class TestCase {
         Options options = getOptions();
         CommandLineParser parser = new BasicParser();
         CommandLine cmd = parser.parse(options, args);
-        
+
         if (cmd.hasOption("ds")) {
             ddlSetupFilename = cmd.getOptionValue("ds");
         }
         if (cmd.hasOption("q")) {
             queryFilename = cmd.getOptionValue("q");
         }
-        
+
         if (cmd.hasOption("s")) {
             selectFilename = cmd.getOptionValue("s");
         } else {

@@ -20,7 +20,8 @@ public class TestCaseTest {
     public void testShortSetup() throws IOException, Exception {
         String query = new TestCase().getDDLSetupQuery(
                 "src/main/resources/tests/ssetup1.hql");
-        assertEquals(query, "CREATE TABLE words(word STRING, length INT)"
+        assertEquals(query, "DROP TABLE IF EXISTS words;"
+                + "\nCREATE TABLE words(word STRING, length INT)"
                 + "\nROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';"
                 + "\nLOAD DATA LOCAL INPATH 'input1.txt' INTO TABLE words;\n");
     }
