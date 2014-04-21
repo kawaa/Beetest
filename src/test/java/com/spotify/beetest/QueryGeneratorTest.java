@@ -17,12 +17,6 @@ public class QueryGeneratorTest {
     String resourcesDir = "src/main/resources";
 
     @Test
-    public void test2() throws IOException, Exception {
-        String query = new TestCase().getTestedQuery("output",
-                "src/main/resources/tests/query1.hql");
-    }
-
-    @Test
     public void test3() throws IOException, Exception {
         String expected = "DROP TABLE IF EXISTS words;\n"
                 + "CREATE TABLE words(word STRING, length INT)\n"

@@ -22,6 +22,7 @@ public final class TestCase {
     private String selectFilename;
     private String expectedFilename;
     private String outputDirectory;
+    private String outputTable = "output";
 
     private String databaseName = "beetest";
     private String testCaseQueryFilename = StringUtils.join(
@@ -104,11 +105,12 @@ public final class TestCase {
         return query.toString();
     }
 
-    public String getTestedQuery(String outputTable,
+    public String getTestedQuery(String outputTable, String outputDirectory,
             String selectFilename) throws IOException {
 
         String ctas = StringUtils.join("CREATE TABLE ", outputTable,
-                    NL, "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' AS ",
+                    NL, "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' ",
+                    NL, "LOCATION '", outputDirectory, "' AS ",
                     NL);
         String select = Utils.readFile(selectFilename);
         
@@ -128,7 +130,7 @@ public final class TestCase {
 
         // final query
         return StringUtils.join(databaseQuery, ddlSetup, query,
-                getTestedQuery(outputDirectory, selectFilename));
+                getTestedQuery(outputTable, outputDirectory, selectFilename));
     }
 
     public Options getOptions() {
