@@ -50,7 +50,7 @@ public final class TestCase {
             queryFilename = StringUtils.join(directory, "/query.hql");
         }
         selectFilename = StringUtils.join(directory, "/select.hql");
-        expectedFilename = StringUtils.join(directory, "/expected");
+        expectedFilename = StringUtils.join(directory, "/expected.tsv");
         outputDirectory = StringUtils.join(directory, "/output");
     }
 
@@ -108,12 +108,12 @@ public final class TestCase {
     public String getTestedQuery(String outputTable, String outputDirectory,
             String selectFilename) throws IOException {
 
-        String ctas = StringUtils.join("CREATE TABLE ", outputTable,
+        String ctas = StringUtils.join("DROP TABLE IF EXISTS ", outputTable, ";",
+                    NL, "CREATE TABLE ", outputTable,
                     NL, "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' ",
                     NL, "LOCATION '", outputDirectory, "' AS ",
                     NL);
         String select = Utils.readFile(selectFilename);
-        
         return ctas + select;
     }
 
