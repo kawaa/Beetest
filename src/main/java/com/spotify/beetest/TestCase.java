@@ -104,19 +104,15 @@ public final class TestCase {
         return query.toString();
     }
 
-    public String getTestedQuery(String outputDir,
+    public String getTestedQuery(String outputTable,
             String selectFilename) throws IOException {
 
-        StringBuilder query = new StringBuilder();
-
-        query.append("INSERT OVERWRITE LOCAL DIRECTORY '");
-        query.append(outputDir);
-        query.append("'");
-        query.append(NL);
-
-        String fileContent = Utils.readFile(selectFilename);
-        query.append(fileContent);
-        return query.toString();
+        String ctas = StringUtils.join("CREATE TABLE ", outputTable,
+                    NL, "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' AS ",
+                    NL);
+        String select = Utils.readFile(selectFilename);
+        
+        return ctas + select;
     }
 
     public String getFinalQuery() throws IOException {
