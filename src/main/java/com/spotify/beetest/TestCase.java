@@ -6,14 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public final class TestCase {
@@ -22,12 +17,15 @@ public final class TestCase {
     private String setupQueryFilename;
     private String selectQueryFilename;
     private String expectedFilename;
-    private String outputDirectory;
-    private String outputTable = "output";
     private String testDirectory;
-    private String databaseName = "beetest";
-    private String testCaseQueryFilename = StringUtils.join(
-            "/tmp/beetest-query-", Utils.getRandomPositiveNumber(), ".hql");
+    private String DATABASE_NAME = "beetest";
+    private String BEETEST_TEST_DIR = StringUtils.join(
+            "/tmp/beetest-test-", Utils.getRandomPositiveNumber());
+    private String BEETEST_TEST_QUERY = StringUtils.join(
+            BEETEST_TEST_DIR, "/query.hql");
+    private String BEETEST_TEST_OUTPUT_TABLE = "output";
+    private String BEETEST_TEST_OUTPUT_DIRECTORY = StringUtils.join(
+            BEETEST_TEST_DIR, "/", BEETEST_TEST_OUTPUT_TABLE);
     private static String NL = "\n";
     private static String TAB = "\t";
 
@@ -35,12 +33,11 @@ public final class TestCase {
     }
 
     public TestCase(String ddlSetupFilename, String queryFilename, String selectFilename,
-            String expectedFilename, String outputDir, String testDirectory) {
+            String expectedFilename, String testDirectory) {
         this.ddlTableFilename = ddlSetupFilename;
         this.selectQueryFilename = selectFilename;
         this.setupQueryFilename = queryFilename;
         this.expectedFilename = expectedFilename;
-        this.outputDirectory = outputDir;
         this.testDirectory = testDirectory;
     }
 
@@ -54,6 +51,7 @@ public final class TestCase {
     }
 
     private void setupFromDirectory(String directory) {
+        testDirectory = directory;
         if (new File(StringUtils.join(directory, "/table.ddl")).exists()) {
             ddlTableFilename = StringUtils.join(directory, "/table.ddl");
         }
@@ -62,8 +60,6 @@ public final class TestCase {
         }
         selectQueryFilename = StringUtils.join(directory, "/select.hql");
         expectedFilename = StringUtils.join(directory, "/expected.txt");
-        outputDirectory = StringUtils.join(directory, "/", outputTable);
-        testDirectory = directory;
     }
 
     private void setupFromFile(String filename) throws IOException {
@@ -74,7 +70,6 @@ public final class TestCase {
         selectQueryFilename = prop.getProperty("st");
         setupQueryFilename = prop.getProperty("sp");
         expectedFilename = prop.getProperty("e");
-        outputDirectory = prop.getProperty("o");
 
     }
 
@@ -82,9 +77,6 @@ public final class TestCase {
         return expectedFilename;
     }
 
-    public String getOutputDirectory() {
-        return outputDirectory;
-    }
 
     public String getDDLSetupQuery(String ddlSetupFilename, String testDirectory)
             throws IOException {
@@ -103,7 +95,7 @@ public final class TestCase {
                     "CREATE TABLE ", tableName, "(", tableSchema, ")", NL,
                     "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';", NL);
             query.append(createTable);
-            
+
             if (parts.length == 1) {
                 String file = testDirectory + "/" + tableName + ".txt";
                 String load = StringUtils.join("LOAD DATA LOCAL INPATH '", file,
@@ -134,7 +126,7 @@ public final class TestCase {
     public String getBeeTestQuery() throws IOException {
         // own database
         String databaseQuery = StringUtils.join("CREATE DATABASE IF NOT EXISTS ",
-                databaseName, ";", NL, "USE ", databaseName, ";", NL);
+                DATABASE_NAME, ";", NL, "USE ", DATABASE_NAME, ";", NL);
 
         // setup
         String tableDdl = (ddlTableFilename != null
@@ -144,27 +136,26 @@ public final class TestCase {
 
         // final query
         return StringUtils.join(databaseQuery, tableDdl, query,
-                getTestedQuery(outputTable, outputDirectory, selectQueryFilename));
+                getTestedQuery(BEETEST_TEST_OUTPUT_TABLE, BEETEST_TEST_OUTPUT_DIRECTORY, selectQueryFilename));
     }
 
     public String getOutputFilename() {
-        return getOutputDirectory() + "/000000_0";
+        return BEETEST_TEST_OUTPUT_DIRECTORY + "/000000_0";
     }
 
     public String getTestCaseQueryFilename() {
-        return testCaseQueryFilename;
+        return BEETEST_TEST_QUERY;
     }
 
     public String generateTestCaseQueryFile()
             throws FileNotFoundException, UnsupportedEncodingException,
             IOException {
-        generateTextFile(testCaseQueryFilename, getBeeTestQuery());
-        return testCaseQueryFilename;
+        generateTextFile(BEETEST_TEST_QUERY, getBeeTestQuery());
+        return BEETEST_TEST_QUERY;
     }
 
-    public boolean deleteTestCaseQueryFile() {
-        File file = new File(testCaseQueryFilename);
-        return file.delete();
+    public void deleteBeetestTestDir() throws IOException {
+        FileUtils.deleteDirectory(new File(BEETEST_TEST_DIR));
     }
 
     private String generateTextFile(String filename, String content)

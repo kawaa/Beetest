@@ -16,7 +16,7 @@ public class TestQueryExecutor {
 
     private static final Logger LOGGER = 
             Logger.getLogger(TestQueryExecutor.class.getName());
-    private static boolean deleteTestCaseQueryFile = true;
+    private static boolean deleteBeetestTestDir = true;
 
     private static String getTestCaseCommand(String config, String queryFilename) {
         return StringUtils.join("hive --config ", config, " -f ", queryFilename);
@@ -44,8 +44,8 @@ public class TestQueryExecutor {
                 new File(tc.getExpectedFilename()),
                 new File(tc.getOutputFilename()));
         
-        if (deleteTestCaseQueryFile) {
-            tc.deleteTestCaseQueryFile();
+        if (deleteBeetestTestDir) {
+            tc.deleteBeetestTestDir();
         }
     }
 
