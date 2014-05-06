@@ -18,14 +18,15 @@ public final class TestCase {
     private String selectQueryFilename;
     private String expectedFilename;
     private String testDirectory;
+    private int TEST_ID = Utils.getRandomPositiveNumber();
     private String DATABASE_NAME = "beetest";
     private String BEETEST_TEST_DIR = StringUtils.join(
-            "/tmp/beetest-test-", Utils.getRandomPositiveNumber());
+            "/tmp/beetest-test-", TEST_ID);
     private String BEETEST_TEST_QUERY = StringUtils.join(
-            BEETEST_TEST_DIR, "/query.hql");
-    private String BEETEST_TEST_OUTPUT_TABLE = "output";
+            BEETEST_TEST_DIR, "-query.hql");
+    private String BEETEST_TEST_OUTPUT_TABLE = "output_" + TEST_ID;
     private String BEETEST_TEST_OUTPUT_DIRECTORY = StringUtils.join(
-            BEETEST_TEST_DIR, "/", BEETEST_TEST_OUTPUT_TABLE);
+            BEETEST_TEST_DIR, "-", BEETEST_TEST_OUTPUT_TABLE);
     private static String NL = "\n";
     private static String TAB = "\t";
 
@@ -116,7 +117,8 @@ public final class TestCase {
     public String getTestedQuery(String outputTable, String outputDirectory,
             String selectFilename) throws IOException {
 
-        String ctas = StringUtils.join("CREATE TABLE ", outputTable, NL,
+        String ctas = StringUtils.join("DROP TABLE IF EXISTS ", outputTable, ";", NL,
+		"CREATE TABLE ", outputTable, NL,
                 "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' ", NL,
                 "LOCATION '", outputDirectory, "' AS ", NL);
         String select = Utils.readFile(selectFilename);
@@ -152,10 +154,6 @@ public final class TestCase {
             IOException {
         generateTextFile(BEETEST_TEST_QUERY, getBeeTestQuery());
         return BEETEST_TEST_QUERY;
-    }
-
-    public void deleteBeetestTestDir() throws IOException {
-        FileUtils.deleteDirectory(new File(BEETEST_TEST_DIR));
     }
 
     private String generateTextFile(String filename, String content)

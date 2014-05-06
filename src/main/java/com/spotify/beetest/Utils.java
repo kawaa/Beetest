@@ -81,5 +81,4 @@ public class Utils {
         FileSystem fs = FileSystem.get(new Configuration());
         return fs.delete(new Path(filename), true);
     }
-    
 }

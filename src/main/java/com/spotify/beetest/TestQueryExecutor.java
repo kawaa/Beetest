@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class TestQueryExecutor {
 
-    private static final Logger LOGGER = 
+    private static final Logger LOGGER =
             Logger.getLogger(TestQueryExecutor.class.getName());
     private static boolean deleteBeetestTestDir = true;
 
@@ -32,9 +32,9 @@ public class TestQueryExecutor {
         LOGGER.log(Level.INFO, "Generated query content: \n{0}", tc.getBeeTestQuery());
 
         String testCaseCommand = getTestCaseCommand(config, queryFilename);
-        
+
         LOGGER.log(Level.INFO, "Running: {0}", testCaseCommand);
-        
+
         Utils.runCommand(testCaseCommand, LOGGER);
 
         LOGGER.log(Level.INFO, "Asserting: {0} and {1}",
@@ -43,9 +43,9 @@ public class TestQueryExecutor {
         FileAssert.assertEquals("Output does not match",
                 new File(tc.getExpectedFilename()),
                 new File(tc.getOutputFilename()));
-        
+
         if (deleteBeetestTestDir) {
-            tc.deleteBeetestTestDir();
+	// TODO: some cleanup
         }
     }
 
