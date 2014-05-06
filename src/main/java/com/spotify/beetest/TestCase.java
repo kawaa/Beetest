@@ -61,7 +61,7 @@ public final class TestCase {
             setupQueryFilename = StringUtils.join(directory, "/setup.hql");
         }
         selectQueryFilename = StringUtils.join(directory, "/select.hql");
-        expectedFilename = StringUtils.join(directory, "/expected");
+        expectedFilename = StringUtils.join(directory, "/expected.txt");
         outputDirectory = StringUtils.join(directory, "/", outputTable);
         testDirectory = directory;
     }
