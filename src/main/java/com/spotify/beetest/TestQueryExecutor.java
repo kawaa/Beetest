@@ -14,15 +14,15 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class TestQueryExecutor {
 
-    private static final Logger LOGGER = Logger.getLogger(TestQueryExecutor.class.getName());
+    private static final Logger LOGGER = 
+            Logger.getLogger(TestQueryExecutor.class.getName());
     private static boolean deleteTestCaseQueryFile = true;
 
     private static String getTestCaseCommand(String config, String queryFilename) {
         return StringUtils.join("hive --config ", config, " -f ", queryFilename);
     }
 
-    public static void run(String testCase, String config, String beetestDir)
-            throws IOException, InterruptedException {
+    public static void run(String testCase, String config, String beetestDir) throws IOException, InterruptedException {
 
         if (beetestDir != null) {
             LOGGER.log(Level.INFO, "Removing a directory: {0}", beetestDir);
@@ -34,18 +34,21 @@ public class TestQueryExecutor {
         String queryFilename = tc.generateTestCaseQueryFile();
 
         LOGGER.log(Level.INFO, "Generated query filename: {0}", queryFilename);
-        LOGGER.log(Level.INFO, "Generated query content: \n{0}", tc.getFinalQuery());
+        LOGGER.log(Level.INFO, "Generated query content: \n{0}", tc.getBeeTestQuery());
 
         String testCaseCommand = getTestCaseCommand(config, queryFilename);
+        
         LOGGER.log(Level.INFO, "Running: {0}", testCaseCommand);
+        
         Utils.runCommand(testCaseCommand, LOGGER);
 
         LOGGER.log(Level.INFO, "Asserting: {0} and {1}",
                 new Object[]{tc.getExpectedFilename(), tc.getOutputFilename()});
 
-        FileAssert.assertEquals(new File(tc.getExpectedFilename()),
+        FileAssert.assertEquals("Output does not match",
+                new File(tc.getExpectedFilename()),
                 new File(tc.getOutputFilename()));
-
+        
         if (deleteTestCaseQueryFile) {
             tc.deleteTestCaseQueryFile();
         }

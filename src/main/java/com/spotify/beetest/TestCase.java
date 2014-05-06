@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.cli.BasicParser;
@@ -17,13 +18,13 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class TestCase {
 
-    private String ddlSetupFilename;
-    private String queryFilename;
-    private String selectFilename;
+    private String ddlTableFilename;
+    private String setupQueryFilename;
+    private String selectQueryFilename;
     private String expectedFilename;
     private String outputDirectory;
     private String outputTable = "output";
-
+    private String testDirectory;
     private String databaseName = "beetest";
     private String testCaseQueryFilename = StringUtils.join(
             "/tmp/beetest-query-", Utils.getRandomPositiveNumber(), ".hql");
@@ -43,36 +44,38 @@ public final class TestCase {
     }
 
     private void setupFromDirectory(String directory) {
-        if (new File(StringUtils.join(directory, "/setup.ddl")).exists()) {
-            ddlSetupFilename = StringUtils.join(directory, "/setup.ddl");
+        if (new File(StringUtils.join(directory, "/table.ddl")).exists()) {
+            ddlTableFilename = StringUtils.join(directory, "/table.ddl");
         }
-        if (new File(StringUtils.join(directory, "/query.hql")).exists()) {
-            queryFilename = StringUtils.join(directory, "/query.hql");
+        if (new File(StringUtils.join(directory, "/setup.hql")).exists()) {
+            setupQueryFilename = StringUtils.join(directory, "/setup.hql");
         }
-        selectFilename = StringUtils.join(directory, "/select.hql");
-        expectedFilename = StringUtils.join(directory, "/expected.tsv");
-        outputDirectory = StringUtils.join(directory, "/output");
+        selectQueryFilename = StringUtils.join(directory, "/select.hql");
+        expectedFilename = StringUtils.join(directory, "/expected");
+        outputDirectory = StringUtils.join(directory, "/", outputTable);
+        testDirectory = directory;
     }
 
     private void setupFromFile(String filename) throws IOException {
         Properties prop = new Properties();
         //load a properties file
         prop.load(new FileInputStream(filename));
-        ddlSetupFilename = prop.getProperty("ds");
-        selectFilename = prop.getProperty("s");
-        queryFilename = prop.getProperty("q");
+        ddlTableFilename = prop.getProperty("t");
+        selectQueryFilename = prop.getProperty("st");
+        setupQueryFilename = prop.getProperty("sp");
         expectedFilename = prop.getProperty("e");
         outputDirectory = prop.getProperty("o");
 
     }
 
     public TestCase(String ddlSetupFilename, String queryFilename, String selectFilename,
-            String expectedFilename, String outputDir) {
-        this.ddlSetupFilename = ddlSetupFilename;
-        this.selectFilename = selectFilename;
-        this.queryFilename = queryFilename;
+            String expectedFilename, String outputDir, String testDirectory) {
+        this.ddlTableFilename = ddlSetupFilename;
+        this.selectQueryFilename = selectFilename;
+        this.setupQueryFilename = queryFilename;
         this.expectedFilename = expectedFilename;
         this.outputDirectory = outputDir;
+        this.testDirectory = testDirectory;
     }
 
     public String getExpectedFilename() {
@@ -89,17 +92,30 @@ public final class TestCase {
 
         List<String> fileContent = Utils.fileToList(ddlSetupFilename);
         for (String line : fileContent) {
-            String[] parts = line.split(TAB);
-            String tableName = parts[0];
-            String tableSchema = parts[1];
-            String inputPath = parts[2];
 
-            String initTable = StringUtils.join("DROP TABLE IF EXISTS ", tableName, ";",
-                    NL, "CREATE TABLE ", tableName, tableSchema,
-                    NL, "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';",
-                    NL, "LOAD DATA LOCAL INPATH '", inputPath, "' INTO TABLE ",
-                    tableName, ";", NL);
-            query.append(initTable);
+            String[] parts = line.split(TAB);
+            String table = parts[0];
+            String tableName = table.substring(0, table.indexOf("("));
+            String tableSchema = table.substring(table.indexOf("(") + 1, table.indexOf(")"));
+
+            String createTable = StringUtils.join(
+                    "DROP TABLE IF EXISTS ", tableName, ";", NL,
+                    "CREATE TABLE ", tableName, tableSchema, NL,
+                    "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';", NL);
+            query.append(createTable);
+
+            if (parts.length == 1) {
+                String file = testDirectory + "/" + tableName + ".tsv";
+                String load = StringUtils.join("LOAD DATA LOCAL INPATH '", file,
+                        "' INTO TABLE ", tableName, ";", NL);
+                query.append(load);
+            } else if (!((parts.length == 2) && (parts[2].equals("")))) {
+                for (int i = 1; i < parts.length; ++i) {
+                    String load = StringUtils.join("LOAD DATA LOCAL INPATH '", parts[i],
+                            "' INTO TABLE ", tableName, ";", NL);
+                    query.append(load);
+                }
+            }
         }
 
         return query.toString();
@@ -108,29 +124,27 @@ public final class TestCase {
     public String getTestedQuery(String outputTable, String outputDirectory,
             String selectFilename) throws IOException {
 
-        String ctas = StringUtils.join("DROP TABLE IF EXISTS ", outputTable, ";",
-                    NL, "CREATE TABLE ", outputTable,
-                    NL, "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' ",
-                    NL, "LOCATION '", outputDirectory, "' AS ",
-                    NL);
+        String ctas = StringUtils.join("CREATE TABLE ", outputTable, NL,
+                "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' ", NL,
+                "LOCATION '", outputDirectory, "' AS ", NL);
         String select = Utils.readFile(selectFilename);
         return ctas + select;
     }
 
-    public String getFinalQuery() throws IOException {
+    public String getBeeTestQuery() throws IOException {
         // own database
         String databaseQuery = StringUtils.join("CREATE DATABASE IF NOT EXISTS ",
                 databaseName, ";", NL, "USE ", databaseName, ";", NL);
 
         // setup
-        String ddlSetup = (ddlSetupFilename != null
-                ? getDDLSetupQuery(ddlSetupFilename) : "");
-        String query = (queryFilename != null
-                ? Utils.readFile(queryFilename) : "");
+        String tableDdl = (ddlTableFilename != null
+                ? getDDLSetupQuery(ddlTableFilename) : "");
+        String query = (setupQueryFilename != null
+                ? Utils.readFile(setupQueryFilename) : "");
 
         // final query
-        return StringUtils.join(databaseQuery, ddlSetup, query,
-                getTestedQuery(outputTable, outputDirectory, selectFilename));
+        return StringUtils.join(databaseQuery, tableDdl, query,
+                getTestedQuery(outputTable, outputDirectory, selectQueryFilename));
     }
 
     public Options getOptions() {
@@ -152,14 +166,14 @@ public final class TestCase {
         CommandLine cmd = parser.parse(options, args);
 
         if (cmd.hasOption("ds")) {
-            ddlSetupFilename = cmd.getOptionValue("ds");
+            ddlTableFilename = cmd.getOptionValue("ds");
         }
         if (cmd.hasOption("q")) {
-            queryFilename = cmd.getOptionValue("q");
+            setupQueryFilename = cmd.getOptionValue("q");
         }
 
         if (cmd.hasOption("s")) {
-            selectFilename = cmd.getOptionValue("s");
+            selectQueryFilename = cmd.getOptionValue("s");
         } else {
             System.err.println("Option -s (selectFilename) is mandatory");
             validArgs = false;
@@ -183,7 +197,7 @@ public final class TestCase {
     public String run(String[] args) throws ParseException, IOException {
         TestCase qg = new TestCase();
         if (qg.parseOptions(args)) {
-            return qg.getFinalQuery();
+            return qg.getBeeTestQuery();
         } else {
             return null;
         }
@@ -200,7 +214,7 @@ public final class TestCase {
     public String generateTestCaseQueryFile()
             throws FileNotFoundException, UnsupportedEncodingException,
             IOException {
-        generateTextFile(testCaseQueryFilename, getFinalQuery());
+        generateTextFile(testCaseQueryFilename, getBeeTestQuery());
         return testCaseQueryFilename;
     }
 
