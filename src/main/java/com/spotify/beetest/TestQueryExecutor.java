@@ -22,12 +22,7 @@ public class TestQueryExecutor {
         return StringUtils.join("hive --config ", config, " -f ", queryFilename);
     }
 
-    public static void run(String testCase, String config, String beetestDir) throws IOException, InterruptedException {
-
-        if (beetestDir != null) {
-            LOGGER.log(Level.INFO, "Removing a directory: {0}", beetestDir);
-            Utils.deletePath(beetestDir);
-        }
+    public static void run(String testCase, String config) throws IOException, InterruptedException {
 
         TestCase tc = new TestCase(testCase);
 
@@ -59,8 +54,7 @@ public class TestQueryExecutor {
 
         String testCase = args[0];
         String config = args[1];
-        String beetestDir = (args.length > 2) ? args[2] : null;
 
-        run(testCase, config, beetestDir);
+        run(testCase, config);
     }
 }
