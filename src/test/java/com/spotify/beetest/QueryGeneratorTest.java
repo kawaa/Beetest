@@ -31,7 +31,6 @@ public class QueryGeneratorTest {
             "-s", "src/main/resources/tests/setup1.hql",
             "-q", "src/main/resources/tests/query1.hql",
             "-o", "/tmp/beetest",};
-        String query = new TestCase().run(args);
-        // assertEquals(expected, query);
+
     }
 }

@@ -34,6 +34,16 @@ public final class TestCase {
     public TestCase() {
     }
 
+    public TestCase(String ddlSetupFilename, String queryFilename, String selectFilename,
+            String expectedFilename, String outputDir, String testDirectory) {
+        this.ddlTableFilename = ddlSetupFilename;
+        this.selectQueryFilename = selectFilename;
+        this.setupQueryFilename = queryFilename;
+        this.expectedFilename = expectedFilename;
+        this.outputDirectory = outputDir;
+        this.testDirectory = testDirectory;
+    }
+
     public TestCase(String path) throws IOException {
         boolean isDirectory = (new File(path)).isDirectory();
         if (isDirectory) {
@@ -68,16 +78,6 @@ public final class TestCase {
 
     }
 
-    public TestCase(String ddlSetupFilename, String queryFilename, String selectFilename,
-            String expectedFilename, String outputDir, String testDirectory) {
-        this.ddlTableFilename = ddlSetupFilename;
-        this.selectQueryFilename = selectFilename;
-        this.setupQueryFilename = queryFilename;
-        this.expectedFilename = expectedFilename;
-        this.outputDirectory = outputDir;
-        this.testDirectory = testDirectory;
-    }
-
     public String getExpectedFilename() {
         return expectedFilename;
     }
@@ -86,7 +86,7 @@ public final class TestCase {
         return outputDirectory;
     }
 
-    public String getDDLSetupQuery(String ddlSetupFilename)
+    public String getDDLSetupQuery(String ddlSetupFilename, String testDirectory)
             throws IOException {
         StringBuilder query = new StringBuilder();
 
@@ -100,16 +100,16 @@ public final class TestCase {
 
             String createTable = StringUtils.join(
                     "DROP TABLE IF EXISTS ", tableName, ";", NL,
-                    "CREATE TABLE ", tableName, tableSchema, NL,
+                    "CREATE TABLE ", tableName, "(", tableSchema, ")", NL,
                     "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t';", NL);
             query.append(createTable);
-
+            
             if (parts.length == 1) {
-                String file = testDirectory + "/" + tableName + ".tsv";
+                String file = testDirectory + "/" + tableName + ".txt";
                 String load = StringUtils.join("LOAD DATA LOCAL INPATH '", file,
                         "' INTO TABLE ", tableName, ";", NL);
                 query.append(load);
-            } else if (!((parts.length == 2) && (parts[2].equals("")))) {
+            } else if (!((parts.length == 2) && (parts[1].equals(" ")))) {
                 for (int i = 1; i < parts.length; ++i) {
                     String load = StringUtils.join("LOAD DATA LOCAL INPATH '", parts[i],
                             "' INTO TABLE ", tableName, ";", NL);
@@ -138,69 +138,13 @@ public final class TestCase {
 
         // setup
         String tableDdl = (ddlTableFilename != null
-                ? getDDLSetupQuery(ddlTableFilename) : "");
+                ? getDDLSetupQuery(ddlTableFilename, testDirectory) : "");
         String query = (setupQueryFilename != null
                 ? Utils.readFile(setupQueryFilename) : "");
 
         // final query
         return StringUtils.join(databaseQuery, tableDdl, query,
                 getTestedQuery(outputTable, outputDirectory, selectQueryFilename));
-    }
-
-    public Options getOptions() {
-        Options options = new Options();
-        options.addOption("ds", true, "specify a DDL setup file");
-        options.addOption("s", true, "specify a select file");
-        options.addOption("q", true, "specify a query file");
-        options.addOption("e", true, "specify an expected output file");
-        options.addOption("o", true, "specify an output directory");
-
-        return options;
-    }
-
-    public boolean parseOptions(String[] args) throws ParseException {
-        boolean validArgs = true;
-        // create Options object
-        Options options = getOptions();
-        CommandLineParser parser = new BasicParser();
-        CommandLine cmd = parser.parse(options, args);
-
-        if (cmd.hasOption("ds")) {
-            ddlTableFilename = cmd.getOptionValue("ds");
-        }
-        if (cmd.hasOption("q")) {
-            setupQueryFilename = cmd.getOptionValue("q");
-        }
-
-        if (cmd.hasOption("s")) {
-            selectQueryFilename = cmd.getOptionValue("s");
-        } else {
-            System.err.println("Option -s (selectFilename) is mandatory");
-            validArgs = false;
-        }
-        if (cmd.hasOption("e")) {
-            expectedFilename = cmd.getOptionValue("e");
-        } else {
-            System.err.println("Option -e (expectedFilename) is mandatory");
-            validArgs = false;
-        }
-        if (cmd.hasOption("o")) {
-            outputDirectory = cmd.getOptionValue("o");
-        } else {
-            System.err.println("Option -o (outputDir) is mandatory");
-            validArgs = false;
-        }
-
-        return validArgs;
-    }
-
-    public String run(String[] args) throws ParseException, IOException {
-        TestCase qg = new TestCase();
-        if (qg.parseOptions(args)) {
-            return qg.getBeeTestQuery();
-        } else {
-            return null;
-        }
     }
 
     public String getOutputFilename() {
@@ -229,9 +173,5 @@ public final class TestCase {
         writer.println(content);
         writer.close();
         return filename;
-    }
-
-    public static void main(String[] args) throws ParseException, IOException {
-        System.out.print(new TestCase().run(args));
     }
 }

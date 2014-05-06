@@ -19,14 +19,14 @@ public class UtilsTest {
     
     @Test
     public void testRunCommandLs() throws IOException, Exception {
-        assertEquals(0, Utils.runCommand("ls src/main/resources/tests/setup1.hql", LOGGER));
+        assertEquals(0, Utils.runCommand("ls src/main/resources/test/setup1.hql", LOGGER));
     }
 
     @Test
     public void testRunCommandDiff() throws IOException, Exception {
         assertEquals(1,
                 Utils.runCommand("diff "
-                + "src/main/resources/tests/setup1.hql "
-                + "src/main/resources/tests/query1.hql", LOGGER));
+                + "src/main/resources/test/setup1.hql "
+                + "src/main/resources/test/query1.hql", LOGGER));
     }
 }
