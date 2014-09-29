@@ -1,5 +1,5 @@
   SELECT artist, COUNT(*) AS cnt
-    FROM stream
+    FROM ${table}
 GROUP BY artist
 ORDER BY cnt DESC
    LIMIT 2;
