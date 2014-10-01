@@ -2,8 +2,14 @@ package com.spotify.beetest;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileInputStream;
+import java.lang.IllegalArgumentException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Properties;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.commons.cli.ParseException;
 import junitx.framework.FileAssert;
 import org.apache.commons.lang3.StringUtils;
@@ -18,8 +24,13 @@ public class TestQueryExecutor {
             Logger.getLogger(TestQueryExecutor.class.getName());
     private static boolean deleteBeetestTestDir = true;
 
-    private static String getTestCaseCommand(String config, String queryFilename) {
-        return StringUtils.join("hive --config ", config, " -f ", queryFilename);
+    private static String getTestCaseCommand(String config, String queryFilename, Properties variables) {
+        List<String> args = new ArrayList<String>(Arrays.asList("hive", "--config", config, "-f", queryFilename));
+        for (String key :  variables.stringPropertyNames()) {
+            args.add("--hivevar");
+            args.add(key + "=" + variables.get(key));
+        }
+        return StringUtils.join(args, " ");
     }
 
     public static void run(String testCase, String config) throws IOException, InterruptedException {
@@ -31,7 +42,15 @@ public class TestQueryExecutor {
         LOGGER.log(Level.INFO, "Generated query filename: {0}", queryFilename);
         LOGGER.log(Level.INFO, "Generated query content: \n{0}", tc.getBeeTestQuery());
 
-        String testCaseCommand = getTestCaseCommand(config, queryFilename);
+        Properties variables = new Properties();
+        try {
+            variables.load(new FileInputStream(tc.getVariablesFilename()));
+        } catch (IOException ex) {
+            LOGGER.log(Level.INFO, "Missing variables file");
+        } catch (IllegalArgumentException ex) {
+            LOGGER.log(Level.SEVERE, "Invalid variables file");
+        }
+        String testCaseCommand = getTestCaseCommand(config, queryFilename, variables);
 
         LOGGER.log(Level.INFO, "Running: {0}", testCaseCommand);
 

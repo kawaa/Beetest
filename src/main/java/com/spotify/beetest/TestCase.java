@@ -18,6 +18,7 @@ public final class TestCase {
     private String selectQueryFilename;
     private String expectedFilename;
     private String testDirectory;
+    private String variablesFilename;
     private int TEST_ID = Utils.getRandomPositiveNumber();
     private String DATABASE_NAME = "beetest";
     private String BEETEST_TEST_DIR = StringUtils.join(
@@ -34,12 +35,13 @@ public final class TestCase {
     }
 
     public TestCase(String ddlSetupFilename, String queryFilename, String selectFilename,
-            String expectedFilename, String testDirectory) {
+            String expectedFilename, String testDirectory, String variablesFilename) {
         this.ddlTableFilename = ddlSetupFilename;
         this.selectQueryFilename = selectFilename;
         this.setupQueryFilename = queryFilename;
         this.expectedFilename = expectedFilename;
         this.testDirectory = testDirectory;
+        this.variablesFilename = variablesFilename;
     }
 
     public TestCase(String path) throws IOException {
@@ -61,6 +63,7 @@ public final class TestCase {
         }
         selectQueryFilename = StringUtils.join(directory, "/select.hql");
         expectedFilename = StringUtils.join(directory, "/expected.txt");
+        variablesFilename = StringUtils.join(directory, "/variables.properties");
     }
 
     private void setupFromFile(String filename) throws IOException {
@@ -71,11 +74,15 @@ public final class TestCase {
         selectQueryFilename = prop.getProperty("st");
         setupQueryFilename = prop.getProperty("sp");
         expectedFilename = prop.getProperty("e");
-
+        variablesFilename = prop.getProperty("v");
     }
 
     public String getExpectedFilename() {
         return expectedFilename;
+    }
+
+    public String getVariablesFilename() {
+        return variablesFilename;
     }
 
 
