@@ -72,4 +72,17 @@ public class TestCaseTest {
 
         assertEquals(query, expected);
     }
+
+    @Test
+    public void testIncludeFile() throws IOException {
+        String query = new TestCase(resourcesDir + "/test/includetest.properties").getBeeTestQuery();
+
+        String expected = "CREATE DATABASE IF NOT EXISTS beetest;\n"
+                + "USE beetest;\n"
+                + "CREATE TABLE words(word STRING, length INT)\n"
+                + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t'\n"
+                + "STORED AS TEXTFILE;\n";
+
+        assertEquals(expected, query.substring(0, expected.length()));
+    };
 }

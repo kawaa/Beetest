@@ -10,6 +10,27 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.lang3.text.StrLookup;
+
+
+class ExternalFilesSubstitutor {
+    public static final String replace(final String source) {
+        StrSubstitutor strSubstitutor = new StrSubstitutor(
+                new StrLookup<Object>() {
+                    @Override
+                    public String lookup(final String key) {
+                        try {
+                            return Utils.readFile(StringUtils.trim(key));
+                        } catch (IOException e) {
+                            return "";
+                        }
+                    }
+                }, "<%", "%>", '$');
+        return strSubstitutor.replace(source);
+    }
+}
+
 
 public final class TestCase {
 
@@ -143,6 +164,8 @@ public final class TestCase {
         String query = (setupQueryFilename != null
                 ? Utils.readFile(setupQueryFilename) : "");
 
+        // include external files in setup.hql
+        query = ExternalFilesSubstitutor.replace(query);
         // final query
         return StringUtils.join(databaseQuery, tableDdl, query,
                 getTestedQuery(BEETEST_TEST_OUTPUT_TABLE, BEETEST_TEST_OUTPUT_DIRECTORY, selectQueryFilename));
