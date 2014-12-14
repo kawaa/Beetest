@@ -33,24 +33,19 @@ We run test with following parameters:
 A unit test is represented as a directory that consists of several files
 * `select.hql` - a query to test
 
-
 	SELECT artist, COUNT(*) AS cnt
-    	FROM ${table}
+	FROM ${table}
 	GROUP BY artist
 	ORDER BY cnt DESC
 	LIMIT 2;
 
-
 * `table.ddl` - schemas of input tables
 
-
 	stream(artist STRING, song STRING, user STRING, ts TIMESTAMP)
-
 
 * text files with input data.
 
 These files should be named in the same way as tables e.g. `stream.txt` contains input records for the `stream` table
-
 
 	Coldplay	Viva la vida	adam.kawa	2013-01-01 21:20:10
 	Coldplay	Viva la vida	natalia.stachura	2013-01-01 21:22:41
@@ -59,13 +54,10 @@ These files should be named in the same way as tables e.g. `stream.txt` contains
 	Oasis	Wonderwall	dog.tofi	2013-01-02 22:17:51
 	Aerosmith	Crazy	natalia.stachura	2013-01-02 23:48:31
 
-
 * `expected.txt` - expected output
-
 
 	Coldplay	3
 	Oasis	2
-
 
 * (optional) `setup.hql` - any initialization query Beetest e.g. setting values of configuration settings
 
