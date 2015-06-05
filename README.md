@@ -118,6 +118,7 @@ Local configuration
 We run a test locally, because we override a couple of Hive settings:
 
 	$ cat local-config/hive-site.xml
+
 	<property>
 		<name>beetest.dir</name>
 		<value>/tmp/beetest/${user.name}</value>
@@ -142,3 +143,7 @@ We run a test locally, because we override a couple of Hive settings:
 		<name>mapreduce.framework.name</name>
 		<value>local</value>
 	</property>
+
+License
+-----
+Beetest is released under the Apache License Version 2.0.
