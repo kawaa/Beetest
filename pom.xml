@@ -29,7 +29,6 @@
             <version>1.4</version>
         </dependency>
             
-
         <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
@@ -47,12 +46,95 @@
             <artifactId>hadoop-client</artifactId>
             <version>2.2.0</version>
         </dependency>
+
+	<dependency>
+    	    <groupId>org.apache.hadoop</groupId>
+    	    <artifactId>hadoop-hdfs</artifactId>
+    	    <version>2.2.0</version>
+	</dependency>
+
+        <dependency>
+    	    <groupId>org.apache.hadoop</groupId>
+    	    <artifactId>hadoop-hdfs</artifactId>
+    	    <version>2.2.0</version>
+    	    <classifier>tests</classifier>
+	</dependency>
+
+	<dependency>
+    	    <groupId>org.apache.hadoop</groupId>
+    	    <artifactId>hadoop-mapred</artifactId>
+    	    <version>0.22.0</version>
+	</dependency>
+
+	<dependency>
+    	    <groupId>org.apache.hadoop</groupId>
+    	    <artifactId>hadoop-core</artifactId>
+    	    <version>1.1.2</version>
+	</dependency>
+
+	<dependency>
+    	    <groupId>org.apache.hadoop</groupId>
+    	    <artifactId>hadoop-minicluster</artifactId>
+    	    <version>2.2.0</version>
+	</dependency>
+
+	<dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
+	<dependency>
+    	    <groupId>commons-configuration</groupId>
+    	    <artifactId>commons-configuration</artifactId>
+    	    <version>1.10</version>
+	</dependency>
+
+	<dependency>
+    	    <groupId>xerces</groupId>
+    	    <artifactId>xercesImpl</artifactId>
+    	    <version>2.9.1</version>
+	</dependency>
+		
+	<dependency>
+    	    <groupId>xalan</groupId>
+    	    <artifactId>xalan</artifactId>
+    	    <version>2.7.1</version>
+	</dependency>
+
+	<dependency>
+    	    <groupId>org.apache.hive</groupId>
+    	    <artifactId>hive-common</artifactId>
+    	    <version>1.2.1</version>
+	</dependency>
+
+	<dependency>
+    	   <groupId>org.apache.hive</groupId>
+    	   <artifactId>hive-service</artifactId>
+    	   <version>1.2.1</version>
+	</dependency>
+
+	<dependency>
+    	   <groupId>org.apache.hive</groupId>
+    	   <artifactId>hive-metastore</artifactId>
+    	   <version>1.2.1</version>
+	</dependency>
+
+	<dependency>
+    	   <groupId>org.apache.derby</groupId>
+    	   <artifactId>derby</artifactId>
+    	   <version>10.11.1.1</version>
+	</dependency>
             
+        <dependency>
+     	   <groupId>org.apache.hive</groupId>
+     	   <artifactId>hive-jdbc</artifactId>
+     	   <version>1.2.1</version>
+ 	</dependency>    
             
     </dependencies>
   
     <profiles>
-
         <profile>
             <id>full</id>
             <build>
@@ -81,9 +163,44 @@
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
+                                <configuration>
+                    	 	    <outputDirectory>${project.build.directory}/jars</outputDirectory>
+                        	    <overWriteReleases>false</overWriteReleases>
+                        	    <overWriteSnapshots>false</overWriteSnapshots>
+                        	    <overWriteIfNewer>true</overWriteIfNewer>
+                    		</configuration>
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+            		<groupId>org.apache.maven.plugins</groupId>
+            		<artifactId>maven-dependency-plugin</artifactId>
+            		<version>2.4</version>
+            		<executions>
+                	    <execution>
+                    	       	<id>copy-dependencies</id>
+                    		<phase>package</phase>
+                    		<goals>
+                               	    <goal>copy-dependencies</goal>
+                    		</goals>
+                    		<configuration>
+                        	    <outputDirectory>${project.build.directory}/jars</outputDirectory>
+                        	    <overWriteReleases>false</overWriteReleases>
+                        	    <overWriteSnapshots>false</overWriteSnapshots>
+                        	    <overWriteIfNewer>true</overWriteIfNewer>
+                    		</configuration>
+                	    </execution>
+            		</executions>
+        	    </plugin>
+        	    <plugin>
+  			<groupId>org.eclipse.jetty</groupId>
+  			<artifactId>jetty-maven-plugin</artifactId>
+  			<configuration>
+    			    <jettyXml>
+     	 		        ${project.basedir}/src/main/resources/configuration.xsl
+    			    </jettyXml>
+  			</configuration>
+		    </plugin>
                 </plugins>
             </build>
         </profile>

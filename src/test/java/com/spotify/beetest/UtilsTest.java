@@ -6,6 +6,7 @@ package com.spotify.beetest;
 
 import java.io.IOException;
 import java.util.logging.Logger;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 

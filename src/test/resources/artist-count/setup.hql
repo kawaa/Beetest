@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS ${table};
+
+CREATE TABLE ${table}(artist STRING, song STRING, user STRING, ts TIMESTAMP)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+STORED AS TEXTFILE;
+
+LOAD DATA LOCAL INPATH 'src/test/resources/artist-count/input.tsv' INTO TABLE ${table};

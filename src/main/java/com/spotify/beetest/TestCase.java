@@ -8,11 +8,10 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Properties;
-import org.apache.commons.io.FileUtils;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.lang3.text.StrLookup;
-
 
 class ExternalFilesSubstitutor {
     public static final String replace(final String source) {
@@ -42,7 +41,9 @@ public final class TestCase {
     private String variablesFilename;
     private int TEST_ID = Utils.getRandomPositiveNumber();
     private String DATABASE_NAME = "beetest";
-    private String BEETEST_TEST_DIR = StringUtils.join(
+    
+    @SuppressWarnings("unchecked")
+	private String BEETEST_TEST_DIR = StringUtils.join(
             "/tmp/beetest-test-", TEST_ID);
     private String BEETEST_TEST_QUERY = StringUtils.join(
             BEETEST_TEST_DIR, "-query.hql");
@@ -51,7 +52,7 @@ public final class TestCase {
             BEETEST_TEST_DIR, "-", BEETEST_TEST_OUTPUT_TABLE);
     private static String NL = "\n";
     private static String TAB = "\t";
-
+    
     public TestCase() {
     }
 
@@ -106,6 +107,9 @@ public final class TestCase {
         return variablesFilename;
     }
 
+    public String getTestDir() {
+    	return BEETEST_TEST_DIR;
+    }
 
     public String getDDLSetupQuery(String ddlSetupFilename, String testDirectory)
             throws IOException {

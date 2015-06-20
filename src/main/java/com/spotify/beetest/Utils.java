@@ -9,13 +9,28 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Logger;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
+import org.apache.hadoop.hdfs.HdfsConfiguration;
+import org.apache.hadoop.hive.conf.HiveConf;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -62,7 +77,29 @@ public class Utils {
             scanner.close();
         }
     }
-
+    
+    public static void copyToLocalDir(DistributedFileSystem dfs, Path dfsPath, File outDir, HiveConf hiveConf) {
+    	try {
+			for(FileStatus file : dfs.listStatus(dfsPath)) {
+				if(file.isDirectory()) {
+					copyToLocalDir(dfs, file.getPath(), outDir, hiveConf);
+				} else {
+					String[] filePathTokens = file.getPath().toString().split("/");
+					File outFile = new File(outDir.getAbsoluteFile() + "/" + filePathTokens[filePathTokens.length - 1]);
+					
+					// NOTE: Avoid dfs.copyToLocalFile(src, dst)
+					// dfs.copyToLocalFile(src, dst) eventually calls FileUtil.copy()
+					// Internally, its creating a configuration object that differs from 
+					// the generated hiveConf for the miniCluster, hence failing to find
+					// the source files
+					FileUtil.copy(dfs, file.getPath(), outFile, false, hiveConf);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
     public static List<String> fileToList(String pathname) throws IOException {
         File file = new File(pathname);
         Scanner scanner = new Scanner(file);
