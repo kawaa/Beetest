@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+
+    <property>
+        <name>hive.root.logger</name>
+        <value>ERROR,console</value>
+    </property>
+
+    <property>
+        <name>beetest.dir</name>
+        <value>/tmp/beetest/${user.name}</value>
+    </property>
+
+    <property>
+        <name>fs.default.name</name>
+        <value>file://${beetest.dir}</value>
+    </property>
+
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>file://${beetest.dir}/warehouse</value>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:derby:;databaseName=${beetest.dir}/metastore_db;create=true</value>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>org.apache.derby.jdbc.EmbeddedDriver</value>
+    </property>
+
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>local</value>
+    </property>
+
+    <property>
+        <name>hive.exec.scratchdir</name>
+        <value>${beetest.dir}/scratchdir</value>
+        <description>Scratch space for Hive jobs</description>
+    </property>
+
+    <property>
+        <name>hive.querylog.location</name>
+        <value>${beetest.dir}/querylog</value>
+        <description>Scratch space for Hive jobs</description>
+    </property>
+
+    <property>
+        <name>hive.cli.print.current.db</name>
+        <description>Whether to include the current database in the hive prompt.</description>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.cli.print.header</name>
+        <description>Whether to print the names of the columns in query output.</description>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>hive.mapred.mode</name>
+        <description>
+            The mode in which the hive operations are being performed.
+            In strict mode, some risky queries are not allowed to run. They include:
+            Cartesian Product.
+            No partition being picked up for a query.
+            Comparing bigints and strings.
+            Comparing bigints and doubles.
+            Orderby without limit.
+        </description>
+        <value>strict</value>
+    </property>
+
+    <property>
+        <name>hive.start.cleanup.scratchdir</name>
+        <description>To cleanup the hive scratchdir while starting the hive server.</description>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.error.on.empty.partition</name>
+        <description>Whether to throw an exception if dynamic partition insert generates empty results.</description>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.insert.into.external.tables</name>
+        <description>https://issues.apache.org/jira/browse/HIVE-2837</description>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.exec.parallel</name>
+        <description>Whether to execute jobs in parallel</description>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.exec.parallel.thread.number</name>
+        <description>How many jobs at most can be executed in parallel</description>
+        <value></value>
+    </property>
+
+    <property>
+        <name>hive.auto.convert.join</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.metastore.execute.setugi</name>
+        <value>true</value>
+    </property>
+</configuration>

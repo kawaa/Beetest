@@ -26,7 +26,27 @@ run-test.sh is a basic script that runs a test and verifies the output:
 
 We run test with following parameters:
 
-	$ ./run-test.sh artist-count-ddl local-config
+The set of arguments needed are:
+	* Directory with set of query, property and expected result files
+	* Directory containing local hive config
+	* (optional -- defaulted to FALSE) TRUE/FALSE to create a MiniDFSCluster and run the queries via HiveServer2
+	* (optional -- defaulted to TRUE) TRUE/FALSE to delete the Beetest directory.
+
+	* Without MiniDFSCluster (assuming that the env is setup with Hive and Hadoop)
+		* In the following execution, MiniDFSCluster is not created and the test directory deletion is defaulted to TRUE, hence, deleted on the completion of the test.
+			$ ./run-test.sh artist-count-ddl local-config	
+		  	
+		* In the following execution, MiniDFSCluster is not created and the state of the test directory can be preserved at the end of the test as needed.
+			$ ./run-test.sh artist-count-ddl local-config FALSE <TRUE/FALSE>
+		  
+		
+	* With MiniDFSCluster
+		* In the following execution, MiniDFSCluster is created and the test directory deletion is defaulted to TRUE, hence, deleted on the completion of the test.
+			$ ./run-test-locally.sh artist-count-ddl local-config TRUE
+		  
+		* In the following execution, MiniDFSCluster is created and the state of the test directory can be preserved at the end of the test as needed. 
+			$ ./run-test-locally.sh artist-count-ddl local-config TRUE <TRUE/FALSE>
+		  
 
 ### How it works
 
@@ -149,6 +169,20 @@ We run a test locally, because we override a couple of Hive settings:
 		<name>mapreduce.framework.name</name>
 		<value>local</value>
 	</property>
+	
+Adding Custom UDF's in the Hive Queries:
+-----
+In order to test custom UDF's in Hive in the MiniDFSCluster via HiveServer2:
+
+	* Update hive-site.xml to provide the following:
+	
+		<property>
+  		  <name>hive.aux.jars.path</name>
+  		  <value>file:///tmp/beetest-lib</value>
+		</property>
+		 
+	* Make sure the folder exists on local file system
+	* If the above property is set, MiniDFSCluster will copy over the jars into hdfs and use it for testing UDF's
 
 License
 -----
