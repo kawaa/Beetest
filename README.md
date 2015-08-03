@@ -2,7 +2,7 @@ Beetest
 =======
 
 Beetest is a simple utility for testing of Apache Hive scripts locally for non-Java developers.
-Beetest has been tested on Hadoop 2.2.0 (YARN) and Hive 0.12.0.
+Beetest has been tested on Hadoop 2.2.0 (YARN) and Hive 1.2.1.
 
 Motivation
 ----------
