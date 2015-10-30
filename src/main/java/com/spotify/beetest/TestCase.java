@@ -151,7 +151,10 @@ public final class TestCase {
 
         String ctas = StringUtils.join("DROP TABLE IF EXISTS ", outputTable, ";", NL,
 		"CREATE TABLE ", outputTable, NL,
-                "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' ", NL,
+                "ROW FORMAT DELIMITED ",NL,
+                "FIELDS TERMINATED BY '\\t'", NL,
+                "COLLECTION ITEMS TERMINATED BY '|'", NL,
+                "MAP KEYS TERMINATED BY '$'", NL,
                 "LOCATION '", outputDirectory, "' AS ", NL);
         String select = Utils.readFile(selectFilename);
         return ctas + select;
