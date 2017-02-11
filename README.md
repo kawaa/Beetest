@@ -27,11 +27,9 @@ run-test.sh is a basic script that runs a test and verifies the output:
 We run test with following parameters:
 
 The set of arguments needed are:
-	* Directory with set of query, property and expected result files
-	* Directory containing local hive config
-	* (optional -- defaulted to FALSE) TRUE/FALSE to create a MiniDFSCluster and run the queries via HiveServer2
-	* (optional -- defaulted to TRUE) TRUE/FALSE to delete the Beetest directory.
-
+* Directory with set of query, property and expected result files
+* Directory containing local hive config
+* (optional -- defaulted to FALSE) TRUE/FALSE to create a MiniDFSCluster and run the queries via HiveServer2
 	* Without MiniDFSCluster (assuming that the env is setup with Hive and Hadoop)
 		* In the following execution, MiniDFSCluster is not created and the test directory deletion is defaulted to TRUE, hence, deleted on the completion of the test.
 			$ ./run-test.sh artist-count-ddl local-config	
@@ -46,6 +44,7 @@ The set of arguments needed are:
 		  
 		* In the following execution, MiniDFSCluster is created and the state of the test directory can be preserved at the end of the test as needed. 
 			$ ./run-test-locally.sh artist-count-ddl local-config TRUE <TRUE/FALSE>
+* (optional -- defaulted to TRUE) TRUE/FALSE to delete the Beetest directory.
 		  
 
 ### How it works
